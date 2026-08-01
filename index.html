@@ -470,12 +470,6 @@
             gap: 8px;
         }
 
-        /* Skills Section */
-        .skills {
-            background: var(--bg-secondary);
-            transition: background-color 0.4s ease;
-        }
-
         /* Blog Section */
         .blog {
             background: var(--bg-primary);
@@ -560,58 +554,6 @@
             color: var(--text-tertiary);
             padding: 40px;
             font-size: 15px;
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-        }
-
-        .skill-card {
-            background: var(--card-bg);
-            border-radius: 18px;
-            padding: 28px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .skill-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--card-shadow);
-        }
-
-        .skill-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent) 0%, #6e8efb 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            font-size: 24px;
-        }
-
-        .skill-title {
-            font-size: 19px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .skill-list {
-            list-style: none;
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .skill-list li::before {
-            content: '·';
-            color: var(--accent);
-            font-weight: bold;
-            margin-right: 6px;
         }
 
         /* Achievements Section */
@@ -892,7 +834,6 @@
                 <div class="about-text reveal">
                     <p>我是傅浩恩，一名信息学竞赛选手。从第一次写下 <code style="color:var(--accent);font-family:monospace;">#include &lt;iostream&gt;</code> 起，便迷上了用代码解决问题的纯粹快乐。</p>
                     <p>钟情于数据结构与动态规划，热衷在 Luogu、Codeforces、AtCoder 上和全世界的选手切磋。每一次 AC 都是新的勋章，每一次 WA 都让人更接近真相。</p>
-                    <p>除了比赛，我也喜欢整理题解、研究 trick，并把这些思考分享给同样热爱算法的朋友。</p>
                 </div>
                 <div class="about-avatar reveal">
                     <div class="avatar-circle">&lt;/&gt;</div>
@@ -981,77 +922,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Skills Section -->
-    <section class="skills" id="skills">
-        <div class="section-inner">
-            <p class="section-eyebrow reveal">技能栈</p>
-            <h2 class="section-title reveal">算法是骨，代码是肉</h2>
-            <p class="section-desc reveal">长年累月打磨的武器库，从基础算法到高级数据结构，皆是赛场上的底气。</p>
-            <div class="skills-grid">
-                <div class="skill-card reveal">
-                    <div class="skill-icon">🧠</div>
-                    <h3 class="skill-title">动态规划</h3>
-                    <ul class="skill-list">
-                        <li>状压 / 数位 DP</li>
-                        <li>斜率优化</li>
-                        <li>决策单调性</li>
-                        <li>WQS 二分</li>
-                    </ul>
-                </div>
-                <div class="skill-card reveal">
-                    <div class="skill-icon">🌲</div>
-                    <h3 class="skill-title">数据结构</h3>
-                    <ul class="skill-list">
-                        <li>线段树 / 树状数组</li>
-                        <li>平衡树 / LCT</li>
-                        <li>主席树 / 树链剖分</li>
-                        <li>可并堆 / KD-Tree</li>
-                    </ul>
-                </div>
-                <div class="skill-card reveal">
-                    <div class="skill-icon">🔗</div>
-                    <h3 class="skill-title">图论</h3>
-                    <ul class="skill-list">
-                        <li>网络流 / 费用流</li>
-                        <li>强连通 / 双连通</li>
-                        <li>最短路 / MST</li>
-                        <li>圆方树 / 虚树</li>
-                    </ul>
-                </div>
-                <div class="skill-card reveal">
-                    <div class="skill-icon">🔤</div>
-                    <h3 class="skill-title">字符串 & 数学</h3>
-                    <ul class="skill-list">
-                        <li>SA / SAM / AC 自动机</li>
-                        <li>NTT / 多项式</li>
-                        <li>莫比乌斯反演</li>
-                        <li>线性基 / FFT</li>
-                    </ul>
-                </div>
-                <div class="skill-card reveal">
-                    <div class="skill-icon">⚡</div>
-                    <h3 class="skill-title">编程语言</h3>
-                    <ul class="skill-list">
-                        <li>C++ (主力)</li>
-                        <li>Python (脚本)</li>
-                        <li>STL 熟练运用</li>
-                        <li>常数优化</li>
-                    </ul>
-                </div>
-                <div class="skill-card reveal">
-                    <div class="skill-icon">🛠️</div>
-                    <h3 class="skill-title">竞赛工具</h3>
-                    <ul class="skill-list">
-                        <li>对拍 / 数据生成</li>
-                        <li>Vim / VSCode</li>
-                        <li>调试与测时</li>
-                        <li>考场模板</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section> -->
 
     <!-- Contact Section -->
     <section class="contact" id="contact">
