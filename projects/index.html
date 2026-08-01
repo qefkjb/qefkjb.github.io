@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
-    <title>博客 — 个人主页</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <title>作品 — 个人主页</title>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -44,10 +44,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        html {
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-        }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -141,14 +138,15 @@
             line-height: 1.4;
         }
 
-        /* Post list */
+        /* Project list */
         .posts-list { display: flex; flex-direction: column; gap: 20px; }
 
-        .post-card {
-            display: block;
+        .project-card {
+            display: flex;
+            gap: 20px;
             background: var(--card-bg);
             border-radius: 18px;
-            padding: 28px;
+            padding: 24px 26px;
             border: 1px solid var(--border);
             text-decoration: none;
             color: inherit;
@@ -156,35 +154,50 @@
             transition: all 0.3s ease;
         }
 
-        .post-card:hover {
+        .project-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--card-shadow-hover);
             border-color: var(--accent);
         }
 
-        .post-card-date {
-            font-size: 13px;
-            color: var(--text-tertiary);
-            margin-bottom: 8px;
+        .project-card-emoji {
+            font-size: 44px;
+            line-height: 1;
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 14px;
         }
 
-        .post-card-title {
-            font-size: 24px;
+        .project-card-body { flex: 1; min-width: 0; }
+
+        .project-card-date {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-bottom: 6px;
+        }
+
+        .project-card-title {
+            font-size: 22px;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             letter-spacing: -0.01em;
             line-height: 1.25;
         }
 
-        .post-card-excerpt {
+        .project-card-excerpt {
             font-size: 15px;
             color: var(--text-secondary);
             line-height: 1.55;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
-        .post-card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .project-card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 
         .tag {
             font-size: 12px;
@@ -202,7 +215,7 @@
             font-size: 15px;
         }
 
-        /* Post view */
+        /* Project view */
         .post-view { display: none; }
         .post-view.active { display: block; }
         .posts-list.hidden { display: none; }
@@ -221,6 +234,12 @@
         }
         .back-link:hover { gap: 8px; }
 
+        .post-emoji {
+            font-size: 64px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
         .post-meta {
             color: var(--text-tertiary);
             font-size: 14px;
@@ -232,8 +251,24 @@
             font-weight: 700;
             letter-spacing: -0.02em;
             line-height: 1.15;
-            margin-bottom: 32px;
+            margin-bottom: 16px;
         }
+
+        .post-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 980px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 32px;
+            transition: background 0.2s;
+        }
+        .post-link:hover { background: var(--accent-hover); }
 
         /* Markdown content */
         .markdown {
@@ -305,18 +340,9 @@
             color: var(--code-text);
         }
 
-        .markdown img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            margin: 1.5em 0;
-        }
+        .markdown img { max-width: 100%; height: auto; border-radius: 12px; margin: 1.5em 0; }
 
-        .markdown hr {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 2em 0;
-        }
+        .markdown hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 
         .markdown table {
             width: 100%;
@@ -331,12 +357,7 @@
             text-align: left;
         }
 
-        .markdown th {
-            background: var(--bg-secondary);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
+        .markdown th { background: var(--bg-secondary); font-weight: 600; color: var(--text-primary); }
         .markdown td { color: var(--text-secondary); }
 
         /* Footer */
@@ -347,12 +368,28 @@
             font-size: 13px;
             border-top: 1px solid var(--border);
         }
+        .footer a { color: var(--text-secondary); text-decoration: none; }
+        .footer a:hover { color: var(--accent); }
 
         /* Comments */
         .comments {
             margin-top: 64px;
             padding-top: 32px;
             border-top: 1px solid var(--border);
+        }
+
+        .comments-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        #comments-container iframe {
+            width: 100%;
+            border: 0;
+            min-height: 200px;
         }
 
         /* Search */
@@ -417,26 +454,11 @@
 
         .search-clear:hover { background: var(--text-tertiary); color: var(--text-primary); }
 
-        .comments-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 24px;
-            letter-spacing: -0.01em;
-        }
-
-        #comments-container iframe {
-            width: 100%;
-            border: 0;
-            min-height: 200px;
-        }
-
-        .footer a { color: var(--text-secondary); text-decoration: none; }
-        .footer a:hover { color: var(--accent); }
-
         @media (max-width: 768px) {
             .container { padding: 80px 18px 60px; }
-            .post-card { padding: 22px; }
+            .project-card { padding: 20px; gap: 14px; }
+            .project-card-emoji { width: 48px; height: 48px; font-size: 32px; }
+            .project-card-title { font-size: 19px; }
         }
     </style>
 </head>
@@ -445,8 +467,8 @@
         <div class="nav-inner">
             <a class="nav-logo" href="../">个人主页</a>
             <div class="nav-links">
-                <a class="nav-link" href="../#projects">作品</a>
-                <a class="nav-link" href="./">博客</a>
+                <a class="nav-link" href="./">作品</a>
+                <a class="nav-link" href="../blog/">博客</a>
                 <a class="nav-link" href="../#contact">联系</a>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
                     <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -472,34 +494,34 @@
         <!-- List view -->
         <div id="list-view">
             <header class="page-header">
-                <p class="eyebrow">Blog</p>
-                <h1 class="page-title">算法笔记与思考</h1>
-                <p class="page-desc">记录赛场上的灵感、刷题时的顿悟，以及那些值得反复品味的妙题。</p>
+                <p class="eyebrow">Projects</p>
+                <h1 class="page-title">作品</h1>
+                <p class="page-desc">算法不只是赛场上的较量，更是值得分享的思维方式。这里是我整理的部分作品。</p>
             </header>
 
-            <!-- 搜索框 -->
             <div class="search-box">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="search-input" class="search-input" placeholder="搜索文章标题、标签或正文…" autocomplete="off">
+                <input type="text" id="search-input" class="search-input" placeholder="搜索作品标题、标签或正文…" autocomplete="off">
                 <button class="search-clear" id="search-clear" aria-label="清空" style="display:none;">×</button>
             </div>
 
             <div class="posts-list" id="posts-list">
-                <div class="loading">正在加载文章…</div>
+                <div class="loading">正在加载作品…</div>
             </div>
         </div>
 
-        <!-- Post view -->
+        <!-- Project view -->
         <article class="post-view" id="post-view">
             <a class="back-link" onclick="showList()">← 返回列表</a>
+            <div class="post-emoji" id="post-emoji"></div>
             <div class="post-meta" id="post-meta"></div>
             <h1 class="post-title" id="post-title"></h1>
+            <a class="post-link" id="post-link" href="#" target="_blank" rel="noopener" style="display:none;">访问外链 →</a>
             <div class="markdown" id="post-content"></div>
 
-            <!-- Comments -->
             <section class="comments" id="comments-section">
                 <h2 class="comments-title">评论</h2>
                 <div id="comments-container"></div>
@@ -513,8 +535,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
     <script>
-        // 博客列表来自 manifest.json（由 build-blog.py 生成）
-        // 文章正文直接 fetch 对应的 .md 文件渲染，无需 GitHub API
+        // 作品列表来自 manifest.json（由 build-blog.py 生成）
+        // 作品正文直接 fetch 对应的 .md 文件渲染，无需 GitHub API
         // 评论使用 Giscus（基于 GitHub Discussions）
         const GISCUS_REPO = 'qefkjb/qefkjb.github.io';
         const GISCUS_REPO_ID = 'R_kgDOTcWjZQ';
@@ -525,7 +547,6 @@
         let allPosts = [];
         const bodyCache = {};
 
-        // 主题切换时同步 Giscus 评论主题
         function syncCommentsTheme(theme) {
             const iframe = document.querySelector('iframe.giscus-frame');
             if (iframe) {
@@ -535,7 +556,6 @@
             }
         }
 
-        // Theme
         function toggleTheme() {
             const body = document.body;
             const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -550,7 +570,6 @@
                 document.body.setAttribute('data-theme', 'dark');
         })();
 
-        // 去掉 frontmatter
         function stripFrontmatter(content) {
             return content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
         }
@@ -567,6 +586,10 @@
             return text.length > len ? text.slice(0, len) + '…' : text;
         }
 
+        function escapeHtml(s) {
+            return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
         async function loadAllPosts() {
             const listEl = document.getElementById('posts-list');
             try {
@@ -575,38 +598,32 @@
                 allPosts = await resp.json();
                 if (!Array.isArray(allPosts)) allPosts = [];
                 renderList();
-                prefetchBodies();  // 后台预取所有正文，供搜索使用
+                prefetchBodies();
                 handleHashChange();
             } catch (e) {
-                console.warn('Blog load failed:', e);
-                listEl.innerHTML = '<div class="empty">文章列表加载失败。<br>请先运行 <code>python build-blog.py</code> 生成 <code>blog/manifest.json</code>。<br>本地预览请用 <code>python -m http.server</code> 启动服务。</div>';
+                console.warn('Projects load failed:', e);
+                listEl.innerHTML = '<div class="empty">作品列表加载失败。<br>请先运行 <code>python build-blog.py</code> 生成 <code>projects/manifest.json</code>。<br>本地预览请用 <code>python -m http.server</code> 启动服务。</div>';
             }
         }
 
-        // 后台预取所有文章正文，缓存到 bodyCache 供搜索匹配
         function prefetchBodies() {
             allPosts.forEach(async p => {
                 if (bodyCache[p.slug]) return;
                 try {
                     const r = await fetch(p.file);
                     bodyCache[p.slug] = await r.text();
-                    // 若当前有搜索词，重新渲染以纳入新内容
                     if (currentQuery) renderList();
                 } catch (e) { /* 忽略 */ }
             });
         }
 
-        // 当前搜索词
         let currentQuery = '';
 
-        // 统计 needle 在 haystack 中出现的次数（不区分大小写）
         function countMatches(haystack, needle) {
             if (!haystack || !needle) return 0;
             return haystack.toLowerCase().split(needle).length - 1;
         }
 
-        // 过滤并按匹配次数从大到小排序
-        // 匹配数 = 标题出现次数 + 标签出现次数 + 正文出现次数
         function filterPosts(query) {
             const q = query.trim().toLowerCase();
             if (!q) return allPosts;
@@ -614,9 +631,10 @@
                 .map(p => {
                     const titleCount = countMatches(p.title, q);
                     const tagsCount = countMatches(p.tags, q);
+                    const summaryCount = countMatches(p.summary, q);
                     const body = bodyCache[p.slug];
                     const bodyCount = body ? countMatches(stripFrontmatter(body), q) : 0;
-                    return { post: p, score: titleCount + tagsCount + bodyCount };
+                    return { post: p, score: titleCount + tagsCount + summaryCount + bodyCount };
                 })
                 .filter(x => x.score > 0)
                 .sort((a, b) => b.score - a.score)
@@ -626,28 +644,33 @@
         function renderList() {
             const listEl = document.getElementById('posts-list');
             if (allPosts.length === 0) {
-                listEl.innerHTML = '<div class="empty">还没有文章。在 /blog 目录下放入 .md 文件，运行 <code>python build-blog.py</code> 后即可显示。</div>';
+                listEl.innerHTML = '<div class="empty">还没有作品。在 /projects 目录下放入 .md 文件，运行 <code>python build-blog.py</code> 后即可显示。</div>';
                 return;
             }
             const posts = filterPosts(currentQuery);
             if (posts.length === 0) {
-                listEl.innerHTML = `<div class="empty">没有匹配「${escapeHtml(currentQuery)}」的文章。</div>`;
+                listEl.innerHTML = `<div class="empty">没有匹配「${escapeHtml(currentQuery)}」的作品。</div>`;
                 return;
             }
             listEl.innerHTML = posts.map(p => {
                 const tags = p.tags
                     ? p.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')
                     : '';
+                const emoji = p.emoji || '📄';
                 return `
-                    <a class="post-card" href="#${p.slug}">
-                        <div class="post-card-date">${p.date || '未署日期'}</div>
-                        <h2 class="post-card-title">${p.title}</h2>
-                        <p class="post-card-excerpt" data-slug="${p.slug}">加载中…</p>
-                        <div class="post-card-tags">${tags}</div>
+                    <a class="project-card" href="#${p.slug}">
+                        <div class="project-card-emoji">${emoji}</div>
+                        <div class="project-card-body">
+                            <div class="project-card-date">${p.date || '未署日期'}</div>
+                            <h2 class="project-card-title">${p.title}</h2>
+                            <p class="project-card-excerpt" data-slug="${p.slug}">${p.summary ? escapeHtml(p.summary) : '加载中…'}</p>
+                            <div class="project-card-tags">${tags}</div>
+                        </div>
                     </a>`;
             }).join('');
-            // 填充摘要（优先用缓存）
+            // 没有 summary 的，从正文提取摘要
             posts.forEach(async p => {
+                if (p.summary) return;
                 const el = listEl.querySelector(`[data-slug="${p.slug}"]`);
                 if (!el) return;
                 if (bodyCache[p.slug]) {
@@ -663,12 +686,6 @@
             });
         }
 
-        // 转义 HTML，防止搜索词注入
-        function escapeHtml(s) {
-            return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        }
-
-        // 绑定搜索框事件
         (function bindSearch() {
             const input = document.getElementById('search-input');
             const clear = document.getElementById('search-clear');
@@ -678,7 +695,7 @@
                 currentQuery = e.target.value;
                 clear.style.display = currentQuery ? 'flex' : 'none';
                 clearTimeout(timer);
-                timer = setTimeout(renderList, 120);  // 轻度防抖
+                timer = setTimeout(renderList, 120);
             });
             clear.addEventListener('click', () => {
                 input.value = '';
@@ -693,30 +710,39 @@
             history.replaceState(null, '', './');
             document.getElementById('list-view').style.display = 'block';
             document.getElementById('post-view').classList.remove('active');
-            // 清空评论，避免下一篇残留
             const cc = document.getElementById('comments-container');
             if (cc) cc.innerHTML = '';
             currentPostSlug = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.title = '博客 — 个人主页';
+            document.title = '作品 — 个人主页';
         }
 
         async function showPost(slug) {
             const post = allPosts.find(p => p.slug === slug);
             if (!post) { showList(); return; }
 
+            document.getElementById('post-emoji').textContent = post.emoji || '📄';
             document.getElementById('post-title').textContent = post.title;
             const tags = post.tags
                 ? post.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join(' ')
                 : '';
             document.getElementById('post-meta').innerHTML = `${post.date || '未署日期'} ${tags ? '· ' + tags : ''}`;
+
+            const linkEl = document.getElementById('post-link');
+            if (post.link) {
+                linkEl.href = post.link;
+                linkEl.style.display = 'inline-flex';
+            } else {
+                linkEl.style.display = 'none';
+            }
+
             const contentEl = document.getElementById('post-content');
             contentEl.innerHTML = '<p>加载中…</p>';
 
             document.getElementById('list-view').style.display = 'none';
             document.getElementById('post-view').classList.add('active');
             window.scrollTo({ top: 0, behavior: 'auto' });
-            document.title = `${post.title} — 博客`;
+            document.title = `${post.title} — 作品`;
 
             try {
                 let txt = bodyCache[slug];
@@ -728,10 +754,9 @@
                 contentEl.innerHTML = marked.parse(stripFrontmatter(txt));
                 protectMedia(contentEl);
             } catch (e) {
-                contentEl.innerHTML = '<p>文章内容加载失败。</p>';
+                contentEl.innerHTML = '<p>作品内容加载失败。</p>';
             }
 
-            // 加载评论（Giscus，基于 GitHub Discussions）
             loadComments(slug);
         }
 
@@ -739,21 +764,17 @@
         // 说明：纯静态站无法真正防下载，此方案挡普通用户，F12 仍可破
         const WATERMARK_TEXT = 'qefkjb.github.io';
         function protectMedia(root) {
-            // 禁右键（仅媒体区域，不影响导航等）
             root.addEventListener('contextmenu', e => e.preventDefault());
-            // 处理所有图片：禁拖拽 + 叠加水印
             root.querySelectorAll('img').forEach(img => {
                 if (img.dataset.protected) return;
                 img.dataset.protected = '1';
                 img.draggable = false;
                 img.style.userSelect = 'none';
                 img.style.webkitUserDrag = 'none';
-                // 图片加载完后叠加水印
                 const apply = () => watermarkImage(img);
                 if (img.complete) apply();
                 else img.addEventListener('load', apply, { once: true });
             });
-            // 处理视频/音频：禁右键、禁下载按钮（controlsList）
             root.querySelectorAll('video, audio').forEach(m => {
                 if (m.dataset.protected) return;
                 m.dataset.protected = '1';
@@ -765,7 +786,7 @@
         function watermarkImage(img) {
             const w = img.naturalWidth, h = img.naturalHeight;
             if (!w || !h) return;
-            // 用 crossOrigin 重新加载图片，避免 canvas 被污染（跨域图必须支持 CORS）
+            // 用 crossOrigin 重新加载图片，避免 canvas 被污染
             const loader = new Image();
             loader.crossOrigin = 'anonymous';
             loader.onload = () => {
@@ -803,7 +824,6 @@
         function loadComments(slug) {
             const container = document.getElementById('comments-container');
             if (!container) return;
-            // 同一篇文章不重复加载
             if (currentPostSlug === slug && container.innerHTML) return;
             currentPostSlug = slug;
             container.innerHTML = '';
@@ -816,7 +836,6 @@
             script.setAttribute('data-repo-id', GISCUS_REPO_ID);
             script.setAttribute('data-category', GISCUS_CATEGORY);
             script.setAttribute('data-category-id', GISCUS_CATEGORY_ID);
-            // 用文章标题作为 discussion 映射，保证每篇独立
             script.setAttribute('data-mapping', 'title');
             script.setAttribute('data-strict', '0');
             script.setAttribute('data-reactions-enabled', '1');

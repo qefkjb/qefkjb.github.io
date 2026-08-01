@@ -384,6 +384,7 @@
         }
 
         .project-card {
+            display: block;
             background: var(--card-bg);
             border-radius: 20px;
             overflow: hidden;
@@ -391,6 +392,8 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             border: 1px solid var(--border);
+            text-decoration: none;
+            color: inherit;
         }
 
         .project-card:hover {
@@ -846,7 +849,7 @@
             <div class="nav-links">
                 <a class="nav-link" href="javascript:void(0)" onclick="scrollToSection('about')">关于</a>
                 <a class="nav-link" href="javascript:void(0)" onclick="scrollToSection('achievements')">成就</a>
-                <a class="nav-link" href="javascript:void(0)" onclick="scrollToSection('projects')">作品</a>
+                <a class="nav-link" href="projects/">作品</a>
                 <a class="nav-link" href="blog/">博客</a>
                 <a class="nav-link" href="javascript:void(0)" onclick="scrollToSection('contact')">联系</a>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
@@ -955,16 +958,11 @@
             <p class="section-eyebrow reveal">题解与作品</p>
             <h2 class="section-title reveal">把思考沉淀成文字</h2>
             <p class="section-desc reveal">算法不只是赛场上的较量，更是值得分享的思维方式。这里是我整理的部分题解与作品。</p>
-            <div class="projects-grid">
-                <div class="project-card reveal" onclick="openLink('https://example.com')">
-                    <div class="project-image"><span class="project-emoji">🏆</span></div>
-                    <div class="project-content">
-                        <span class="project-tag">暂无</span>
-                        <h3 class="project-title">暂无</h3>
-                        <p class="project-desc">暂无</p>
-                        <a class="project-link" href="https://example.com" target="_blank" rel="noopener">查看 →</a>
-                    </div>
-                </div>
+            <div class="projects-grid" id="projects-grid">
+                <div class="blog-empty">正在加载作品…</div>
+            </div>
+            <div class="blog-more reveal">
+                <a class="btn btn-secondary" href="projects/">查看全部作品 →</a>
             </div>
         </div>
     </section>
@@ -1147,10 +1145,42 @@
 
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // Prevent card click from firing twice when clicking inner links
-        document.querySelectorAll('.project-card a').forEach(a => {
-            a.addEventListener('click', e => e.stopPropagation());
-        });
+        // ===== Projects: 读取 projects/manifest.json（由 build-blog.py 生成）=====
+        async function loadProjectsPreview() {
+            const grid = document.getElementById('projects-grid');
+            if (!grid) return;
+            try {
+                const resp = await fetch('projects/manifest.json');
+                if (!resp.ok) throw new Error('manifest: ' + resp.status);
+                const items = await resp.json();
+                if (!Array.isArray(items) || items.length === 0) {
+                    grid.innerHTML = '<div class="blog-empty">还没有作品，在 /projects 目录下放入 .md 文件，运行 <code>python build-blog.py</code> 后即可显示。</div>';
+                    return;
+                }
+                const top = items.slice(0, 3);
+                grid.innerHTML = top.map(p => {
+                    const tag = p.tags ? p.tags.split(',')[0].trim() : '作品';
+                    const emoji = p.emoji || '📄';
+                    const summary = p.summary || '点击查看详情';
+                    const link = p.link || `projects/#${p.slug}`;
+                    const external = p.link ? ` target="_blank" rel="noopener"` : '';
+                    return `
+                        <a class="project-card reveal" href="${link}"${external}>
+                            <div class="project-image"><span class="project-emoji">${emoji}</span></div>
+                            <div class="project-content">
+                                <span class="project-tag">${tag}</span>
+                                <h3 class="project-title">${p.title}</h3>
+                                <p class="project-desc">${summary}</p>
+                                <span class="project-link">查看 →</span>
+                            </div>
+                        </a>`;
+                }).join('');
+                grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            } catch (e) {
+                console.warn('Projects load failed:', e);
+                grid.innerHTML = '<div class="blog-empty">作品列表加载失败。请先运行 <code>python build-blog.py</code> 生成 <code>projects/manifest.json</code>。</div>';
+            }
+        }
 
         // ===== Blog: 读取 blog/manifest.json（由 build-blog.py 生成）=====
         async function loadBlogPreview() {
@@ -1203,7 +1233,8 @@
             }
         }
 
-        // 启动博客加载
+        // 启动作品、博客加载
+        loadProjectsPreview();
         loadBlogPreview();
     </script>
 </body>
