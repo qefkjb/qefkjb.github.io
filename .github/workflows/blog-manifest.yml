@@ -1,0 +1,40 @@
+name: Build Blog Manifest
+
+on:
+  push:
+    paths:
+      - "blog/**/*.md"
+      - "build-blog.py"
+      - ".github/workflows/blog-manifest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate manifest.json
+        run: python build-blog.py
+
+      - name: Commit manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add blog/manifest.json
+          if git diff --cached --quiet; then
+            echo "manifest 无变化"
+          else
+            git commit -m "chore(blog): auto-update manifest [skip ci]"
+            git push
+          fi

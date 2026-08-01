@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "contest-retrospect",
+    "file": "contest-retrospect.md",
+    "title": "一场 Codeforces Div.2 的复盘",
+    "date": "2026-07-30",
+    "tags": "Codeforces, 比赛复盘"
+  },
+  {
+    "slug": "dp-optimization",
+    "file": "dp-optimization.md",
+    "title": "动态规划优化技巧小结",
+    "date": "2026-07-25",
+    "tags": "DP, 算法, 学习笔记"
+  },
+  {
+    "slug": "hello-world",
+    "file": "hello-world.md",
+    "title": "你好，世界 — 我的第一篇博客",
+    "date": "2026-07-20",
+    "tags": "随笔, OI"
+  }
+]
