@@ -596,17 +596,28 @@
         // 当前搜索词
         let currentQuery = '';
 
-        // 过滤文章：标题、标签、正文（已缓存时）匹配
+        // 统计 needle 在 haystack 中出现的次数（不区分大小写）
+        function countMatches(haystack, needle) {
+            if (!haystack || !needle) return 0;
+            return haystack.toLowerCase().split(needle).length - 1;
+        }
+
+        // 过滤并按匹配次数从大到小排序
+        // 匹配数 = 标题出现次数 + 标签出现次数 + 正文出现次数
         function filterPosts(query) {
             const q = query.trim().toLowerCase();
             if (!q) return allPosts;
-            return allPosts.filter(p => {
-                if (p.title.toLowerCase().includes(q)) return true;
-                if (p.tags && p.tags.toLowerCase().includes(q)) return true;
-                const body = bodyCache[p.slug];
-                if (body && stripFrontmatter(body).toLowerCase().includes(q)) return true;
-                return false;
-            });
+            return allPosts
+                .map(p => {
+                    const titleCount = countMatches(p.title, q);
+                    const tagsCount = countMatches(p.tags, q);
+                    const body = bodyCache[p.slug];
+                    const bodyCount = body ? countMatches(stripFrontmatter(body), q) : 0;
+                    return { post: p, score: titleCount + tagsCount + bodyCount };
+                })
+                .filter(x => x.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .map(x => x.post);
         }
 
         function renderList() {
