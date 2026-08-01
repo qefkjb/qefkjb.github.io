@@ -543,22 +543,24 @@
     <script>
         // 博客列表来自 manifest.json（由 build-blog.py 生成）
         // 文章正文直接 fetch 对应的 .md 文件渲染，无需 GitHub API
-        // 评论使用 Utterances（基于 GitHub Issues，纯静态可用）
-        // ⚠️ 把下面 REPO 改成你的仓库（owner/repo），并安装 https://github.com/apps/utterances
-        const UTTERANCES_REPO = 'qefkjb/qefkjb.github.io';
+        // 评论使用 Giscus（基于 GitHub Discussions，比 Utterances 更稳定）
+        // ⚠️ 配置步骤见底部说明，需先填入 GISCUS_REPO_ID 和 GISCUS_CATEGORY_ID
+        const GISCUS_REPO = 'qefkjb/qefkjb.github.io';
+        const GISCUS_REPO_ID = 'R_kgDOTcWjZQ';
+        const GISCUS_CATEGORY = 'Announcements';
+        const GISCUS_CATEGORY_ID = 'DIC_kwDOTcWjZc4DCdEK';
         let currentPostSlug = '';
 
         let allPosts = [];
         const bodyCache = {};
 
-        // 主题切换时同步评论主题
+        // 主题切换时同步 Giscus 评论主题
         function syncCommentsTheme(theme) {
-            const iframe = document.querySelector('#comments-container iframe');
+            const iframe = document.querySelector('iframe.giscus-frame');
             if (iframe) {
-                iframe.contentWindow.postMessage(
-                    { type: 'set-theme', theme: theme === 'dark' ? 'github-dark' : 'github-light' },
-                    'https://utteranc.es'
-                );
+                iframe.contentWindow.postMessage({
+                    giscus: { setConfig: { theme: theme === 'dark' ? 'dark_dimmed' : 'light' } }
+                }, 'https://giscus.app');
             }
         }
 
@@ -757,48 +759,35 @@
                 contentEl.innerHTML = '<p>文章内容加载失败。</p>';
             }
 
-            // 加载评论（Utterances，基于 GitHub Issues）
+            // 加载评论（Giscus，基于 GitHub Discussions）
             loadComments(slug);
         }
 
-        let commentLoadTimer = null;
         function loadComments(slug) {
             const container = document.getElementById('comments-container');
             if (!container) return;
             // 同一篇文章不重复加载
             if (currentPostSlug === slug && container.innerHTML) return;
             currentPostSlug = slug;
-            container.innerHTML = '<p class="comments-loading">评论加载中…</p>';
-            const theme = document.body.getAttribute('data-theme') === 'dark' ? 'github-dark' : 'github-light';
+            container.innerHTML = '';
+            const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark_dimmed' : 'light';
             const script = document.createElement('script');
-            script.src = 'https://utteranc.es/client.js';
+            script.src = 'https://giscus.app/client.js';
             script.async = true;
-            script.setAttribute('repo', UTTERANCES_REPO);
-            // 用文章标题作为 issue 标识（document.title 已在 showPost 设置为 "文章标题 — 博客"）
-            script.setAttribute('issue-term', 'title');
-            script.setAttribute('label', '💬 评论');
-            script.setAttribute('theme', theme);
             script.crossOrigin = 'anonymous';
-            // 超时检测：8 秒后若仍无 iframe，提示安装 Utterances App
-            clearTimeout(commentLoadTimer);
-            commentLoadTimer = setTimeout(() => {
-                const iframe = container.querySelector('iframe');
-                if (!iframe) {
-                    container.innerHTML = `
-                        <p class="comments-error">评论加载失败。</p>
-                        <p class="comments-hint">请确认：</p>
-                        <ol class="comments-hint">
-                            <li>已访问 <a href="https://github.com/apps/utterances" target="_blank">github.com/apps/utterances</a> 安装 App</li>
-                            <li>安装时选择了仓库 <code>${UTTERANCES_REPO}</code></li>
-                            <li>该仓库是 public</li>
-                        </ol>`;
-                }
-            }, 8000);
-            script.onload = () => clearTimeout(commentLoadTimer);
-            script.onerror = () => {
-                clearTimeout(commentLoadTimer);
-                container.innerHTML = '<p class="comments-error">Utterances 脚本加载失败，请检查网络。</p>';
-            };
+            script.setAttribute('data-repo', GISCUS_REPO);
+            script.setAttribute('data-repo-id', GISCUS_REPO_ID);
+            script.setAttribute('data-category', GISCUS_CATEGORY);
+            script.setAttribute('data-category-id', GISCUS_CATEGORY_ID);
+            // 用文章标题作为 discussion 映射，保证每篇独立
+            script.setAttribute('data-mapping', 'title');
+            script.setAttribute('data-strict', '0');
+            script.setAttribute('data-reactions-enabled', '1');
+            script.setAttribute('data-emit-metadata', '0');
+            script.setAttribute('data-input-position', 'top');
+            script.setAttribute('data-theme', theme);
+            script.setAttribute('data-lang', 'zh-CN');
+            script.setAttribute('data-loading', 'lazy');
             container.appendChild(script);
         }
 
