@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客 — 个人主页</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --bg-tertiary: #fbfbfd;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --border: rgba(0, 0, 0, 0.08);
+            --nav-bg: rgba(255, 255, 255, 0.72);
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --code-bg: #f5f5f7;
+            --code-text: #1d1d1f;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1d1d1f;
+            --bg-tertiary: #0a0a0c;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --text-tertiary: #86868b;
+            --accent: #2997ff;
+            --accent-hover: #47a5ff;
+            --border: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(22, 22, 24, 0.72);
+            --card-bg: #1d1d1f;
+            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.6);
+            --code-bg: #0a0a0c;
+            --code-text: #f5f5f7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.47;
+            font-size: 17px;
+            letter-spacing: -0.01em;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* Nav */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 52px;
+            background: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+
+        .nav-inner {
+            max-width: 1024px;
+            margin: 0 auto;
+            height: 100%;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo, .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-logo { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+        .nav-link { color: var(--text-secondary); font-size: 13px; }
+        .nav-logo:hover, .nav-link:hover { color: var(--accent); }
+
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+
+        .theme-toggle {
+            background: none; border: none; cursor: pointer;
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .theme-toggle:hover { color: var(--text-primary); transform: scale(1.1); }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .sun-icon { display: none; }
+        [data-theme="dark"] .sun-icon { display: block; }
+        [data-theme="dark"] .moon-icon { display: none; }
+
+        /* Layout */
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 100px 22px 80px;
+        }
+
+        .page-header { margin-bottom: 56px; }
+
+        .eyebrow {
+            font-size: 17px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-title {
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .page-desc {
+            font-size: 19px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Post list */
+        .posts-list { display: flex; flex-direction: column; gap: 20px; }
+
+        .post-card {
+            display: block;
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--accent);
+        }
+
+        .post-card-date {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+        }
+
+        .post-card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+            line-height: 1.25;
+        }
+
+        .post-card-excerpt {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 14px;
+        }
+
+        .post-card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .tag {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 980px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .empty, .loading {
+            text-align: center;
+            color: var(--text-tertiary);
+            padding: 60px 20px;
+            font-size: 15px;
+        }
+
+        /* Post view */
+        .post-view { display: none; }
+        .post-view.active { display: block; }
+        .posts-list.hidden { display: none; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 32px;
+            cursor: pointer;
+            transition: gap 0.3s ease;
+        }
+        .back-link:hover { gap: 8px; }
+
+        .post-meta {
+            color: var(--text-tertiary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .post-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 32px;
+        }
+
+        /* Markdown content */
+        .markdown {
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        .markdown h1, .markdown h2, .markdown h3, .markdown h4 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            margin-top: 1.8em;
+            margin-bottom: 0.6em;
+        }
+
+        .markdown h1 { font-size: 32px; margin-top: 0; }
+        .markdown h2 { font-size: 26px; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
+        .markdown h3 { font-size: 21px; }
+        .markdown h4 { font-size: 17px; color: var(--text-secondary); }
+
+        .markdown p { margin: 1em 0; color: var(--text-secondary); }
+        .markdown strong { color: var(--text-primary); font-weight: 600; }
+
+        .markdown a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .markdown a:hover { border-bottom-color: var(--accent); }
+
+        .markdown ul, .markdown ol { margin: 1em 0; padding-left: 1.5em; color: var(--text-secondary); }
+        .markdown li { margin: 0.4em 0; }
+        .markdown ul li::marker { color: var(--accent); }
+
+        .markdown blockquote {
+            margin: 1.5em 0;
+            padding: 8px 20px;
+            border-left: 3px solid var(--accent);
+            background: var(--bg-secondary);
+            border-radius: 0 12px 12px 0;
+            color: var(--text-secondary);
+        }
+
+        .markdown code {
+            font-family: "SF Mono", "JetBrains Mono", Consolas, monospace;
+            font-size: 0.88em;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .markdown pre {
+            margin: 1.5em 0;
+            padding: 18px 20px;
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            line-height: 1.5;
+        }
+
+        .markdown pre code {
+            background: none;
+            padding: 0;
+            font-size: 14px;
+            color: var(--code-text);
+        }
+
+        .markdown img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin: 1.5em 0;
+        }
+
+        .markdown hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2em 0;
+        }
+
+        .markdown table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            font-size: 15px;
+        }
+
+        .markdown th, .markdown td {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .markdown th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .markdown td { color: var(--text-secondary); }
+
+        /* Footer */
+        .footer {
+            padding: 32px 22px;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer a { color: var(--text-secondary); text-decoration: none; }
+        .footer a:hover { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .container { padding: 80px 18px 60px; }
+            .post-card { padding: 22px; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <nav class="nav">
+        <div class="nav-inner">
+            <a class="nav-logo" href="../">个人主页</a>
+            <div class="nav-links">
+                <a class="nav-link" href="../#projects">作品</a>
+                <a class="nav-link" href="./">博客</a>
+                <a class="nav-link" href="../#contact">联系</a>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
+                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- List view -->
+        <div id="list-view">
+            <header class="page-header">
+                <p class="eyebrow">Blog</p>
+                <h1 class="page-title">算法笔记与思考</h1>
+                <p class="page-desc">记录赛场上的灵感、刷题时的顿悟，以及那些值得反复品味的妙题。</p>
+            </header>
+            <div class="posts-list" id="posts-list">
+                <div class="loading">正在加载文章…</div>
+            </div>
+        </div>
+
+        <!-- Post view -->
+        <article class="post-view" id="post-view">
+            <a class="back-link" onclick="showList()">← 返回列表</a>
+            <div class="post-meta" id="post-meta"></div>
+            <h1 class="post-title" id="post-title"></h1>
+            <div class="markdown" id="post-content"></div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 个人主页 · <a href="../">返回首页</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+    <script>
+        // 修改这里以匹配你的 GitHub 仓库（owner/repo）
+        const BLOG_REPO = 'qefkjb/qefkjb.github.io';
+        const BLOG_DIR = 'blog';
+
+        let allPosts = [];
+
+        // Theme
+        function toggleTheme() {
+            const body = document.body;
+            const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+        (function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.body.setAttribute('data-theme', saved);
+            else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                document.body.setAttribute('data-theme', 'dark');
+        })();
+
+        // Frontmatter parsing
+        function parseFrontmatter(content) {
+            const m = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+            if (!m) return { fm: {}, body: content };
+            const fm = {};
+            m[1].split(/\r?\n/).forEach(line => {
+                const idx = line.indexOf(':');
+                if (idx > -1) fm[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+            });
+            return { fm, body: m[2] };
+        }
+
+        function extractExcerpt(body, len = 160) {
+            const text = body
+                .replace(/^#+\s.*$/gm, '')
+                .replace(/```[\s\S]*?```/g, '')
+                .replace(/!\[.*?\]\(.*?\)/g, '')
+                .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+                .replace(/[#*`>_~]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            return text.length > len ? text.slice(0, len) + '…' : text;
+        }
+
+        async function fetchPost(file) {
+            const resp = await fetch(file.download_url);
+            const content = await resp.text();
+            const { fm, body } = parseFrontmatter(content);
+            const slug = file.name.replace(/\.md$/, '');
+            return {
+                slug,
+                title: fm.title || (body.match(/^#\s+(.+)$/m) || [])[1] || slug,
+                date: fm.date || '',
+                tags: fm.tags || '',
+                excerpt: extractExcerpt(body),
+                body,
+                downloadUrl: file.download_url
+            };
+        }
+
+        async function loadAllPosts() {
+            const listEl = document.getElementById('posts-list');
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${BLOG_REPO}/contents/${BLOG_DIR}`);
+                if (!resp.ok) throw new Error('GitHub API: ' + resp.status);
+                const files = await resp.json();
+                const mdFiles = (Array.isArray(files) ? files : []).filter(
+                    f => f.type === 'file' && f.name.endsWith('.md') && f.name.toLowerCase() !== 'index.md' && f.name.toLowerCase() !== 'readme.md'
+                );
+                allPosts = await Promise.all(mdFiles.map(fetchPost));
+                allPosts.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                renderList();
+                handleHashChange();
+            } catch (e) {
+                console.warn('Blog load failed:', e);
+                listEl.innerHTML = '<div class="empty">文章加载失败。<br>请确认已部署到 GitHub Pages，并检查 BLOG_REPO 配置是否正确。<br>本地预览请使用 <code>python -m http.server</code> 启动服务。</div>';
+            }
+        }
+
+        function renderList() {
+            const listEl = document.getElementById('posts-list');
+            if (allPosts.length === 0) {
+                listEl.innerHTML = '<div class="empty">还没有文章。在 /blog 目录下放入 .md 文件即可自动显示。</div>';
+                return;
+            }
+            listEl.innerHTML = allPosts.map(p => {
+                const tags = p.tags
+                    ? p.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('')
+                    : '';
+                return `
+                    <a class="post-card" href="#${p.slug}">
+                        <div class="post-card-date">${p.date || '未署日期'}</div>
+                        <h2 class="post-card-title">${p.title}</h2>
+                        <p class="post-card-excerpt">${p.excerpt}</p>
+                        <div class="post-card-tags">${tags}</div>
+                    </a>`;
+            }).join('');
+        }
+
+        function showList() {
+            history.replaceState(null, '', './');
+            document.getElementById('list-view').style.display = 'block';
+            document.getElementById('post-view').classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showPost(slug) {
+            const post = allPosts.find(p => p.slug === slug);
+            if (!post) { showList(); return; }
+
+            const { fm, body } = parseFrontmatter(post.body);
+            document.getElementById('post-title').textContent = post.title;
+            const tags = post.tags
+                ? post.tags.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join(' ')
+                : '';
+            document.getElementById('post-meta').innerHTML = `${post.date || '未署日期'} ${tags ? '· ' + tags : ''}`;
+            document.getElementById('post-content').innerHTML = marked.parse(body);
+
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('post-view').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'auto' });
+            document.title = `${post.title} — 博客`;
+        }
+
+        function handleHashChange() {
+            const slug = window.location.hash.slice(1);
+            if (slug && allPosts.some(p => p.slug === slug)) {
+                showPost(slug);
+            } else {
+                showList();
+            }
+        }
+
+        window.addEventListener('hashchange', handleHashChange);
+        loadAllPosts();
+    </script>
+</body>
+</html>
