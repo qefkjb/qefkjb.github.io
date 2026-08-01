@@ -431,34 +431,6 @@
             min-height: 200px;
         }
 
-        .comments-loading {
-            color: var(--text-tertiary);
-            font-size: 14px;
-            padding: 12px 0;
-        }
-
-        .comments-error {
-            color: #ff3b30;
-            font-size: 14px;
-            padding: 12px 0;
-            margin: 0;
-        }
-
-        .comments-hint {
-            color: var(--text-secondary);
-            font-size: 13px;
-            line-height: 1.6;
-            margin: 8px 0 0;
-        }
-
-        .comments-hint a { color: var(--accent); }
-        .comments-hint code {
-            background: var(--bg-secondary);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
         .footer a { color: var(--text-secondary); text-decoration: none; }
         .footer a:hover { color: var(--accent); }
 
@@ -543,8 +515,7 @@
     <script>
         // 博客列表来自 manifest.json（由 build-blog.py 生成）
         // 文章正文直接 fetch 对应的 .md 文件渲染，无需 GitHub API
-        // 评论使用 Giscus（基于 GitHub Discussions，比 Utterances 更稳定）
-        // ⚠️ 配置步骤见底部说明，需先填入 GISCUS_REPO_ID 和 GISCUS_CATEGORY_ID
+        // 评论使用 Giscus（基于 GitHub Discussions）
         const GISCUS_REPO = 'qefkjb/qefkjb.github.io';
         const GISCUS_REPO_ID = 'R_kgDOTcWjZQ';
         const GISCUS_CATEGORY = 'Announcements';
