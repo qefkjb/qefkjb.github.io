@@ -732,11 +732,11 @@
             script.src = 'https://utteranc.es/client.js';
             script.async = true;
             script.setAttribute('repo', UTTERANCES_REPO);
-            script.setAttribute('issue-term', 'pathname');
+            // 用文章标题作为 issue 标识（document.title 已在 showPost 设置为 "文章标题 — 博客"）
+            // Utterances 会读取页面 title 创建/匹配 Issue
+            script.setAttribute('issue-term', 'title');
             script.setAttribute('label', '💬 评论');
             script.setAttribute('theme', theme);
-            // 用文章路径作为唯一标识，保证换设备/部署后评论一致
-            script.setAttribute('pathname', `/blog/${slug}`);
             script.crossOrigin = 'anonymous';
             container.appendChild(script);
         }
