@@ -347,6 +347,26 @@
             border-top: 1px solid var(--border);
         }
 
+        /* Comments */
+        .comments {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .comments-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        #comments-container iframe {
+            width: 100%;
+            border: 0;
+        }
+
         .footer a { color: var(--text-secondary); text-decoration: none; }
         .footer a:hover { color: var(--accent); }
 
@@ -403,6 +423,12 @@
             <div class="post-meta" id="post-meta"></div>
             <h1 class="post-title" id="post-title"></h1>
             <div class="markdown" id="post-content"></div>
+
+            <!-- Comments -->
+            <section class="comments" id="comments-section">
+                <h2 class="comments-title">评论</h2>
+                <div id="comments-container"></div>
+            </section>
         </article>
     </main>
 
@@ -414,8 +440,24 @@
     <script>
         // 博客列表来自 manifest.json（由 build-blog.py 生成）
         // 文章正文直接 fetch 对应的 .md 文件渲染，无需 GitHub API
+        // 评论使用 Utterances（基于 GitHub Issues，纯静态可用）
+        // ⚠️ 把下面 REPO 改成你的仓库（owner/repo），并安装 https://github.com/apps/utterances
+        const UTTERANCES_REPO = 'qefkjb/qefkjb.github.io';
+        let currentPostSlug = '';
+
         let allPosts = [];
         const bodyCache = {};
+
+        // 主题切换时同步评论主题
+        function syncCommentsTheme(theme) {
+            const iframe = document.querySelector('#comments-container iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage(
+                    { type: 'set-theme', theme: theme === 'dark' ? 'github-dark' : 'github-light' },
+                    'https://utteranc.es'
+                );
+            }
+        }
 
         // Theme
         function toggleTheme() {
@@ -423,6 +465,7 @@
             const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
+            syncCommentsTheme(newTheme);
         }
         (function initTheme() {
             const saved = localStorage.getItem('theme');
@@ -498,6 +541,10 @@
             history.replaceState(null, '', './');
             document.getElementById('list-view').style.display = 'block';
             document.getElementById('post-view').classList.remove('active');
+            // 清空评论，避免下一篇残留
+            const cc = document.getElementById('comments-container');
+            if (cc) cc.innerHTML = '';
+            currentPostSlug = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
             document.title = '博客 — 个人主页';
         }
@@ -530,6 +577,30 @@
             } catch (e) {
                 contentEl.innerHTML = '<p>文章内容加载失败。</p>';
             }
+
+            // 加载评论（Utterances，基于 GitHub Issues）
+            loadComments(slug);
+        }
+
+        function loadComments(slug) {
+            const container = document.getElementById('comments-container');
+            if (!container) return;
+            // 同一篇文章不重复加载
+            if (currentPostSlug === slug && container.innerHTML) return;
+            currentPostSlug = slug;
+            container.innerHTML = '';
+            const theme = document.body.getAttribute('data-theme') === 'dark' ? 'github-dark' : 'github-light';
+            const script = document.createElement('script');
+            script.src = 'https://utteranc.es/client.js';
+            script.async = true;
+            script.setAttribute('repo', UTTERANCES_REPO);
+            script.setAttribute('issue-term', 'pathname');
+            script.setAttribute('label', '💬 评论');
+            script.setAttribute('theme', theme);
+            // 用文章路径作为唯一标识，保证换设备/部署后评论一致
+            script.setAttribute('pathname', `/blog/${slug}`);
+            script.crossOrigin = 'anonymous';
+            container.appendChild(script);
         }
 
         function handleHashChange() {
