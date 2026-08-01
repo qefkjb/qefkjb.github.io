@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     <title>博客 — 个人主页</title>
     <style>
         :root {
@@ -427,6 +428,35 @@
         #comments-container iframe {
             width: 100%;
             border: 0;
+            min-height: 200px;
+        }
+
+        .comments-loading {
+            color: var(--text-tertiary);
+            font-size: 14px;
+            padding: 12px 0;
+        }
+
+        .comments-error {
+            color: #ff3b30;
+            font-size: 14px;
+            padding: 12px 0;
+            margin: 0;
+        }
+
+        .comments-hint {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 8px 0 0;
+        }
+
+        .comments-hint a { color: var(--accent); }
+        .comments-hint code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
         .footer a { color: var(--text-secondary); text-decoration: none; }
@@ -731,24 +761,44 @@
             loadComments(slug);
         }
 
+        let commentLoadTimer = null;
         function loadComments(slug) {
             const container = document.getElementById('comments-container');
             if (!container) return;
             // 同一篇文章不重复加载
             if (currentPostSlug === slug && container.innerHTML) return;
             currentPostSlug = slug;
-            container.innerHTML = '';
+            container.innerHTML = '<p class="comments-loading">评论加载中…</p>';
             const theme = document.body.getAttribute('data-theme') === 'dark' ? 'github-dark' : 'github-light';
             const script = document.createElement('script');
             script.src = 'https://utteranc.es/client.js';
             script.async = true;
             script.setAttribute('repo', UTTERANCES_REPO);
             // 用文章标题作为 issue 标识（document.title 已在 showPost 设置为 "文章标题 — 博客"）
-            // Utterances 会读取页面 title 创建/匹配 Issue
             script.setAttribute('issue-term', 'title');
             script.setAttribute('label', '💬 评论');
             script.setAttribute('theme', theme);
             script.crossOrigin = 'anonymous';
+            // 超时检测：8 秒后若仍无 iframe，提示安装 Utterances App
+            clearTimeout(commentLoadTimer);
+            commentLoadTimer = setTimeout(() => {
+                const iframe = container.querySelector('iframe');
+                if (!iframe) {
+                    container.innerHTML = `
+                        <p class="comments-error">评论加载失败。</p>
+                        <p class="comments-hint">请确认：</p>
+                        <ol class="comments-hint">
+                            <li>已访问 <a href="https://github.com/apps/utterances" target="_blank">github.com/apps/utterances</a> 安装 App</li>
+                            <li>安装时选择了仓库 <code>${UTTERANCES_REPO}</code></li>
+                            <li>该仓库是 public</li>
+                        </ol>`;
+                }
+            }, 8000);
+            script.onload = () => clearTimeout(commentLoadTimer);
+            script.onerror = () => {
+                clearTimeout(commentLoadTimer);
+                container.innerHTML = '<p class="comments-error">Utterances 脚本加载失败，请检查网络。</p>';
+            };
             container.appendChild(script);
         }
 
