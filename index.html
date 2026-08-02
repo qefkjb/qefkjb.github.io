@@ -23,6 +23,7 @@
             --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
             --gradient-hero: radial-gradient(ellipse at top, #f0f0f5 0%, #ffffff 60%);
             --overlay: rgba(255, 255, 255, 0.6);
+            --cursor-glow: radial-gradient(circle, rgba(0, 113, 227, 0.32) 0%, rgba(0, 113, 227, 0.14) 35%, rgba(0, 113, 227, 0.04) 60%, transparent 72%);
         }
 
         [data-theme="dark"] {
@@ -41,6 +42,7 @@
             --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.6);
             --gradient-hero: radial-gradient(ellipse at top, #1a1a2e 0%, #000000 60%);
             --overlay: rgba(0, 0, 0, 0.5);
+            --cursor-glow: radial-gradient(circle, rgba(255, 200, 40, 0.45) 0%, rgba(255, 180, 30, 0.18) 35%, rgba(255, 170, 20, 0.05) 60%, transparent 72%);
         }
 
         /* 暗色主题补充：原生控件配色、文本选区高亮、暗色滚动条 */
@@ -749,7 +751,7 @@
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(255, 200, 40, 0.45) 0%, rgba(255, 180, 30, 0.18) 35%, rgba(255, 170, 20, 0.05) 60%, transparent 72%);
+            background: var(--cursor-glow);
         }
 
         .cursor-glow::after {
@@ -877,7 +879,7 @@
         <p class="hero-subtitle">一名热爱算法竞赛的 OIer，沉迷于数据结构、动态规划与那些令人拍案叫绝的巧妙思路。</p>
         <div class="hero-cta">
             <a class="btn btn-primary" href="javascript:void(0)" onclick="scrollToSection('achievements')">查看战绩</a>
-            <a class="btn btn-secondary" href="javascript:void(0)" onclick="scrollToSection('projects')">题解作品</a>
+            <a class="btn btn-secondary" href="javascript:void(0)" onclick="scrollToSection('projects')">作品</a>
         </div>
     </section>
 
@@ -952,9 +954,9 @@
     <!-- Projects Section -->
     <section class="projects" id="projects">
         <div class="section-inner">
-            <p class="section-eyebrow reveal">题解与作品</p>
-            <h2 class="section-title reveal">把思考沉淀成文字</h2>
-            <p class="section-desc reveal">算法不只是赛场上的较量，更是值得分享的思维方式。这里是我整理的部分题解与作品。</p>
+            <p class="section-eyebrow reveal">作品</p>
+            <h2 class="section-title reveal">把思考沉淀成作品</h2>
+            <p class="section-desc reveal">这里是我整理的部分作品。</p>
             <div class="projects-grid" id="projects-grid">
                 <div class="blog-empty">正在加载作品…</div>
             </div>
