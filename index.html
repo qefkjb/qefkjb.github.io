@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     <title>个人主页 — 傅浩恩</title>
     <style>
@@ -41,6 +42,25 @@
             --gradient-hero: radial-gradient(ellipse at top, #1a1a2e 0%, #000000 60%);
             --overlay: rgba(0, 0, 0, 0.5);
         }
+
+        /* 暗色主题补充：原生控件配色、文本选区高亮、暗色滚动条 */
+        :root { color-scheme: light; }
+        [data-theme="dark"] { color-scheme: dark; }
+
+        ::selection {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        /* 暗色模式下自定义滚动条，避免 Windows 上浅色滚动条刺眼 */
+        [data-theme="dark"] ::-webkit-scrollbar { width: 12px; height: 12px; }
+        [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #3a3a3c;
+            border-radius: 6px;
+            border: 3px solid var(--bg-secondary);
+        }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #565658; }
 
         * {
             margin: 0;
@@ -782,6 +802,18 @@
             }
         }
     </style>
+    <script>
+        // 尽早应用主题，避免暗色模式下的白屏闪烁（FOUC）
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var root = document.documentElement;
+                root.setAttribute('data-theme', theme);
+                root.style.colorScheme = theme;
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body data-theme="light">
     <!-- Navigation -->
@@ -973,21 +1005,20 @@
     <script>
         // Theme toggle
         function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
+            const root = document.documentElement;
+            const currentTheme = root.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
+            root.setAttribute('data-theme', newTheme);
+            root.style.colorScheme = newTheme;
             localStorage.setItem('theme', newTheme);
         }
 
-        // Init theme from localStorage or system preference
+        // Init theme from localStorage or system preference (inline script already applied it pre-paint)
         (function initTheme() {
             const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                document.body.setAttribute('data-theme', savedTheme);
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.body.setAttribute('data-theme', 'dark');
-            }
+            const theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
         })();
 
         // Smooth scroll

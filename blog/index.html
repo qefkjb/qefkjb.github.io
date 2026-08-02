@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     <title>博客 — 个人主页</title>
     <style>
@@ -41,6 +42,25 @@
             --code-bg: #0a0a0c;
             --code-text: #f5f5f7;
         }
+
+        /* 暗色主题补充：原生控件配色、文本选区高亮、暗色滚动条 */
+        :root { color-scheme: light; }
+        [data-theme="dark"] { color-scheme: dark; }
+
+        ::selection {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        /* 暗色模式下自定义滚动条，避免 Windows 上浅色滚动条刺眼 */
+        [data-theme="dark"] ::-webkit-scrollbar { width: 12px; height: 12px; }
+        [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #3a3a3c;
+            border-radius: 6px;
+            border: 3px solid var(--bg-secondary);
+        }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #565658; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -439,6 +459,18 @@
             .post-card { padding: 22px; }
         }
     </style>
+    <script>
+        // 尽早应用主题，避免暗色模式下的白屏闪烁（FOUC）
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var root = document.documentElement;
+                root.setAttribute('data-theme', theme);
+                root.style.colorScheme = theme;
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body data-theme="light">
     <nav class="nav">
@@ -537,17 +569,18 @@
 
         // Theme
         function toggleTheme() {
-            const body = document.body;
-            const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
+            const root = document.documentElement;
+            const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', newTheme);
+            root.style.colorScheme = newTheme;
             localStorage.setItem('theme', newTheme);
             syncCommentsTheme(newTheme);
         }
         (function initTheme() {
             const saved = localStorage.getItem('theme');
-            if (saved) document.body.setAttribute('data-theme', saved);
-            else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
-                document.body.setAttribute('data-theme', 'dark');
+            const theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
         })();
 
         // 去掉 frontmatter
@@ -807,7 +840,7 @@
             if (currentPostSlug === slug && container.innerHTML) return;
             currentPostSlug = slug;
             container.innerHTML = '';
-            const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark_dimmed' : 'light';
+            const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark_dimmed' : 'light';
             const script = document.createElement('script');
             script.src = 'https://giscus.app/client.js';
             script.async = true;
