@@ -738,6 +738,28 @@
             color: var(--accent);
         }
 
+        /* Cursor Glow */
+        .cursor-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 200, 40, 0.45) 0%, rgba(255, 180, 30, 0.18) 35%, rgba(255, 170, 20, 0.05) 60%, transparent 72%);
+        }
+
+        .cursor-glow::after {
+            display: none;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .cursor-glow { display: none; }
+        }
+
         /* Animations */
         @keyframes fadeUp {
             from {
@@ -816,6 +838,8 @@
     </script>
 </head>
 <body data-theme="light">
+    <!-- Mouse Glow -->
+    <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-inner">
@@ -1133,6 +1157,48 @@
                 grid.innerHTML = '<div class="blog-empty">文章列表加载失败。请先运行 <code>python build-blog.py</code> 生成 blog/manifest.json。</div>';
             }
         }
+
+        // ===== Cursor Glow: 鼠标周围散发黄光 =====
+        (function initCursorGlow() {
+            const glow = document.getElementById('cursor-glow');
+            if (!glow) return;
+            // 触摸设备无鼠标，跳过
+            if (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+
+            let x = window.innerWidth / 2;
+            let y = window.innerHeight / 2;
+            let tx = x;
+            let ty = y;
+            let raf = null;
+
+            document.addEventListener('mousemove', function (e) {
+                tx = e.clientX;
+                ty = e.clientY;
+                if (!raf) {
+                    raf = requestAnimationFrame(smoothGlow);
+                }
+            }, { passive: true });
+
+            function smoothGlow() {
+                raf = null;
+                x += (tx - x) * 0.16;
+                y += (ty - y) * 0.16;
+                glow.style.left = x + 'px';
+                glow.style.top = y + 'px';
+                if (Math.abs(tx - x) > 0.5 || Math.abs(ty - y) > 0.5) {
+                    raf = requestAnimationFrame(smoothGlow);
+                }
+            }
+
+            document.addEventListener('mouseleave', function () {
+                glow.style.transition = 'opacity 0.4s ease';
+                glow.style.opacity = '0';
+            });
+            document.addEventListener('mouseenter', function () {
+                glow.style.transition = 'opacity 0.4s ease';
+                glow.style.opacity = '1';
+            });
+        })();
 
         // 启动作品、博客加载
         loadProjectsPreview();
