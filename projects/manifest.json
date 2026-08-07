@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "slug": "speedtest",
+    "file": "speedtest.md",
+    "title": "Speed Test",
+    "date": "2026-08-07",
+    "tags": "工具, 测试, 网络",
+    "order": "1",
+    "emoji": "⚡",
+    "summary": "一个网络速度测试工具，用于检测网络连接的下载和上传速度。",
+    "link": "https://qefkjb.github.io/speedtest/"
+  }
+]
