@@ -1,5 +1,12 @@
 [
   {
+    "slug": "git-tutorial",
+    "file": "git-tutorial.md",
+    "title": "Git 使用指南",
+    "date": "2026-08-07",
+    "tags": "Git, 工具, 教程"
+  },
+  {
     "slug": "test",
     "file": "test.md",
     "title": "test",
