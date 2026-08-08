@@ -9,5 +9,16 @@
     "emoji": "⚡",
     "summary": "一个网络速度测试工具，用于检测网络连接的下载和上传速度。",
     "link": "https://qefkjb.github.io/speedtest/"
+  },
+  {
+    "slug": "luckypick",
+    "file": "luckypick.md",
+    "title": "LuckyPick 每日抽号",
+    "date": "2026-08-08",
+    "tags": "游戏, 抽奖, 随机数",
+    "order": "2",
+    "emoji": "🎲",
+    "summary": "每日一次的抽数字游戏：从 0 到 1,000,000 抽取一个数字，解锁数学徽章、赢取 EP、比拼稀有度。",
+    "link": "https://qefkjb.github.io/LuckyPick/"
   }
 ]

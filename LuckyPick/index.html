@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="LuckyPick —— 每日一次的抽数字游戏：从 0 到 1,000,000 抽取一个数字，解锁数学徽章、赢取 EP、比拼稀有度。">
+<title>LuckyPick · 每日抽号</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<script>
+(function(){try{var t=localStorage.getItem('theme');var d=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var v=t||(d?'dark':'light');document.documentElement.setAttribute('data-theme',v);}catch(e){}})();
+</script>
+<style>
+:root{
+  --bg:#0d0d13; --bg2:#14141c; --card:#1a1a24; --line:rgba(255,255,255,.09);
+  --tx:#f2f2f5; --tx2:#a3a3b0; --tx3:#66667a;
+  --gold:#f5c518; --gold-soft:rgba(245,197,24,.14);
+  --t-trash:#7b8490; --t-common:#9aa0a6; --t-uncommon:#2dd4a7; --t-rare:#4da3ff; --t-epic:#b06bff; --t-anomaly:#ffb020; --t-mythic:#ff5c7a;
+  color-scheme:dark;
+}
+[data-theme="light"]{
+  --bg:#f4f4f7; --bg2:#ffffff; --card:#ffffff; --line:rgba(0,0,0,.1);
+  --tx:#18181e; --tx2:#5d5d68; --tx3:#9a9aa6;
+  --gold:#b98a00; --gold-soft:rgba(185,138,0,.12);
+  color-scheme:light;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--tx); line-height:1.55; min-height:100vh;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,var(--gold-soft),transparent 70%);
+}
+.mono{font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+
+header{
+  position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:color-mix(in srgb,var(--bg) 78%,transparent);border-bottom:1px solid var(--line);
+}
+.hd{max-width:760px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:19px;font-weight:800;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.logo span{color:var(--gold)}
+.hdbtns{display:flex;gap:8px;align-items:center}
+.hbtn{
+  background:var(--card);border:1px solid var(--line);color:var(--tx2);border-radius:10px;
+  padding:7px 13px;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.hbtn:hover{color:var(--tx);border-color:var(--gold);transform:translateY(-1px)}
+
+main{padding:34px 18px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 22px;margin-bottom:20px}
+
+.eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3);margin-bottom:6px;text-align:center}
+.title{font-size:clamp(26px,5vw,34px);font-weight:800;text-align:center;margin-bottom:4px}
+.title b{color:var(--gold)}
+.sub{text-align:center;color:var(--tx2);font-size:14px;margin-bottom:24px}
+
+.digits{
+  display:flex;justify-content:center;gap:8px;margin:6px 0 4px;
+  user-select:none;-webkit-user-select:none;
+}
+.digit{
+  width:clamp(42px,11vw,64px);height:clamp(56px,14vw,80px);
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(34px,9vw,56px);font-weight:700;letter-spacing:.04em;
+  background:var(--bg2);border:1px solid var(--line);border-radius:14px;
+  font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+  color:var(--gold);transition:border-color .3s;
+}
+.digit.dim{color:var(--tx3);border-style:dashed}
+.digit.lit{animation:digitIn .35s ease}
+@keyframes digitIn{from{transform:translateY(-6px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+
+.status{text-align:center;color:var(--tx2);font-size:13px;margin-top:10px;min-height:20px}
+.range{text-align:center;color:var(--tx3);font-size:12px;margin-top:2px}
+
+.btnrow{display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+.btn{
+  border:none;cursor:pointer;font-family:inherit;border-radius:999px;font-weight:800;
+  padding:15px 38px;font-size:16px;letter-spacing:.04em;transition:all .22s;
+}
+.btn-main{
+  background:linear-gradient(135deg,#ffd75e,var(--gold));color:#1a1400;
+  box-shadow:0 8px 26px rgba(245,197,24,.28);
+}
+.btn-main:hover:not(:disabled){transform:translateY(-2px) scale(1.02);box-shadow:0 12px 34px rgba(245,197,24,.4)}
+.btn-main:active:not(:disabled){transform:scale(.97)}
+.btn-main:disabled{background:var(--bg2);color:var(--tx3);box-shadow:none;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--tx2);padding:15px 22px;font-size:14px;font-weight:600}
+.btn-ghost:hover{color:var(--tx);border-color:var(--gold)}
+
+.cd{display:flex;justify-content:center;align-items:baseline;gap:10px;margin-top:22px;flex-wrap:wrap}
+.cd-time{font-size:26px;font-weight:700;color:var(--gold);font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.cd-label{font-size:13px;color:var(--tx2)}
+.cd-date{font-size:12px;color:var(--tx3)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center}
+.stat-n{font-size:22px;font-weight:800;color:var(--gold);font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.stat-l{font-size:12px;color:var(--tx3);margin-top:2px}
+
+#result{display:none}
+#result.show{display:block}
+.banner{
+  border-radius:16px;padding:18px 20px;text-align:center;margin-bottom:18px;
+  border:2px solid var(--bc);background:linear-gradient(130deg,var(--bg1),var(--bg2));color:var(--fg);
+}
+.banner-icon{font-size:30px;line-height:1}
+.banner-name{font-size:26px;font-weight:800;margin-top:4px}
+.banner-en{font-size:12px;letter-spacing:.24em;text-transform:uppercase;opacity:.75;margin-top:2px}
+.banner-top{font-size:14px;margin-top:8px;font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.banner-ep{font-size:19px;font-weight:800;margin-top:6px}
+.t-trash{--bc:#7b8490;--bg1:#2e2e35;--bg2:#1e1e24;--fg:#c9ccd4}
+.t-common{--bc:#9aa0a6;--bg1:#33343c;--bg2:#232329;--fg:#d7d9de}
+.t-uncommon{--bc:#2dd4a7;--bg1:#0d3a30;--bg2:#0a2a23;--fg:#8ef0d2}
+.t-rare{--bc:#4da3ff;--bg1:#0c2f4e;--bg2:#081f36;--fg:#a8d2ff}
+.t-epic{--bc:#b06bff;--bg1:#2b1a45;--bg2:#1c1030;--fg:#dcc3ff}
+.t-anomaly{--bc:#ffb020;--bg1:#3a2a08;--bg2:#281d05;--fg:#ffd98a}
+.t-mythic{--bc:#ff5c7a;--bg1:#441424;--bg2:#2b0a12;--fg:#ffb3c2;animation:mythicPulse 2.4s ease-in-out infinite}
+[data-theme="light"] .t-trash{--bg1:#ececf0;--bg2:#f7f7f9;--fg:#4a4f57}
+[data-theme="light"] .t-common{--bg1:#e8e9ec;--bg2:#f5f5f7;--fg:#52575f}
+[data-theme="light"] .t-uncommon{--bg1:#d9f5ec;--bg2:#eefaf6;--fg:#0e7a5e}
+[data-theme="light"] .t-rare{--bg1:#dcebff;--bg2:#eef6ff;--fg:#1f6fd6}
+[data-theme="light"] .t-epic{--bg1:#eee3ff;--bg2:#f7f0ff;--fg:#7b3fd4}
+[data-theme="light"] .t-anomaly{--bg1:#ffefcf;--bg2:#fff8e8;--fg:#b5790a}
+[data-theme="light"] .t-mythic{--bg1:#ffe0e8;--bg2:#fff0f4;--fg:#d62e55}
+@keyframes mythicPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,92,122,.35)}50%{box-shadow:0 0 26px 4px rgba(255,92,122,.45)}}
+
+.sechead{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 12px}
+.sechead h2{font-size:18px;font-weight:800}
+.sechead .note{font-size:12px;color:var(--tx3)}
+
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.badge-card{
+  background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px;
+  text-align:center;position:relative;overflow:hidden;
+  animation:pop .5s cubic-bezier(.2,.7,.3,1.25) both;
+}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
+.badge-card::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--bcc,#555)}
+.badge-card.support{opacity:.45}
+.badge-card.support::after{content:'支持';position:absolute;top:8px;right:8px;font-size:10px;color:var(--tx3)}
+.b-icon{font-size:26px;line-height:1.2}
+.b-name{font-size:14px;font-weight:700;margin-top:4px}
+.b-tier{font-size:11px;color:var(--tx3);margin-top:2px}
+.b-ep{font-size:12px;font-weight:700;color:var(--gold);margin-top:3px;font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.bt-common{--bcc:var(--t-common)} .bt-uncommon{--bcc:var(--t-uncommon)} .bt-rare{--bcc:var(--t-rare)}
+.bt-epic{--bcc:var(--t-epic)} .bt-anomaly{--bcc:var(--t-anomaly)} .bt-mythic{--bcc:var(--t-mythic)} .bt-trash{--bcc:var(--t-trash)}
+
+.actions{display:flex;justify-content:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.demo-note{text-align:center;color:var(--t-anomaly);font-size:12px;margin-top:10px}
+
+.h-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px dashed var(--line);font-size:14px}
+.h-row:last-child{border-bottom:none}
+.h-date{color:var(--tx3);font-size:12px;width:88px;flex:none}
+.h-num{font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;font-weight:700;width:110px}
+.chip{font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid var(--bc);color:var(--bc);flex:none}
+.h-ep{margin-left:auto;font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;font-weight:700;color:var(--gold)}
+.empty{color:var(--tx3);text-align:center;font-size:13px;padding:14px}
+
+.col-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.col-item{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;font-size:11px;position:relative}
+.col-item .c-icon{font-size:20px}
+.col-item .c-name{color:var(--tx2);margin-top:2px;font-size:11px}
+.col-item.locked{opacity:.32;filter:grayscale(1)}
+.col-item .c-count{position:absolute;top:6px;right:8px;font-size:10px;color:var(--gold);font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+
+.rules{display:grid;gap:12px;margin-top:6px}
+.rule{display:flex;gap:12px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.rule .r-ico{font-size:18px;flex:none}
+.rule b{display:block;font-size:14px;margin-bottom:2px}
+.rule p{font-size:13px;color:var(--tx2)}
+.rule p a{color:var(--gold)}
+
+.modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modal-card{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:620px;width:100%;max-height:82vh;overflow-y:auto;padding:26px}
+.modal-card h2{font-size:20px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-close{float:right;cursor:pointer;color:var(--tx2);border:none;background:none;font-size:22px;line-height:1}
+
+footer{text-align:center;color:var(--tx3);font-size:12px;padding:26px 18px 40px;border-top:1px solid var(--line)}
+footer a{color:var(--tx2);text-decoration:none}
+footer a:hover{color:var(--gold)}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);
+  background:#1a1400;color:#ffd75e;border:1px solid var(--gold);border-radius:999px;
+  padding:10px 22px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;
+  transition:all .3s;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.5);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:560px){
+  .stats{grid-template-columns:1fr}
+  .digit{gap:5px}
+  .h-date{width:74px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo"><span>🎲</span> Lucky<span>Pick</span></div>
+    <div class="hdbtns">
+      <button class="hbtn" id="rulesBtn">玩法</button>
+      <button class="hbtn" id="themeBtn" title="切换主题">🌙</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="card">
+    <p class="eyebrow">Daily · 每日一次</p>
+    <h1 class="title">今日<b>手气</b>如何？</h1>
+    <p class="sub">抽取一个 0 – 1,000,000 的数字，解锁数学徽章，比拼稀有度</p>
+    <div class="digits" id="digits">
+      <span class="digit dim">·</span><span class="digit dim">·</span><span class="digit dim">·</span>
+      <span class="digit dim">·</span><span class="digit dim">·</span><span class="digit dim">·</span>
+    </div>
+    <div class="status" id="status">今日尚未抽取</div>
+    <div class="range">范围 0 – 1,000,000 共 1,000,001 种可能</div>
+    <div class="btnrow">
+      <button class="btn btn-main" id="rollBtn">🎲 今日开抽</button>
+      <button class="btn btn-ghost" id="demoBtn">🎰 演示抽取</button>
+    </div>
+    <div class="cd">
+      <span class="cd-label">下次开抽</span>
+      <span class="cd-time" id="cdTime">--:--:--</span>
+      <span class="cd-date" id="cdDate"></span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="stToday">—</div><div class="stat-l">今日 EP</div></div>
+      <div class="stat"><div class="stat-n" id="stLife">0</div><div class="stat-l">终身 EP</div></div>
+      <div class="stat"><div class="stat-n" id="stCol">0/0</div><div class="stat-l">徽章收集</div></div>
+    </div>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="card" id="rulesCard">
+    <p class="eyebrow">How to play</p>
+    <h2 class="sechead" style="margin-top:0">玩法说明</h2>
+    <div class="rules">
+      <div class="rule"><span class="r-ico">🎲</span><div><b>每天一次</b><p>每 UTC 日可抽取一个随机数（0 到 1,000,000）。抽过的数字当天锁定，第二天 UTC 零点刷新。</p></div></div>
+      <div class="rule"><span class="r-ico">🏅</span><div><b>徽章与 EP</b><p>数字匹配的每种模式都会解锁徽章并获得 EP（熵点）。同一家族（如「对子/三条/四条」）只计入最高的一枚，其余作为「支持」发现展示。</p></div></div>
+      <div class="rule"><span class="r-ico">⭐</span><div><b>稀有度评级</b><p>按今日 EP 在所有 1,000,001 种抽取中的百分位评级：垃圾 &lt; 平凡 &lt; 少见 &lt; 稀有 &lt; 史诗 &lt; 异常 &lt; 神话（Top 1%）。</p></div></div>
+      <div class="rule"><span class="r-ico">💾</span><div><b>数据本地保存</b><p>抽取结果、终身 EP 与徽章图鉴保存在浏览器 localStorage 中，无任何服务器，可放心玩耍。</p></div></div>
+      <div class="rule"><span class="r-ico">🎮</span><div><b>演示模式</b><p>「演示抽取」可无限次试玩，结果带演示标记、不会保存，也不占用每日次数。</p></div></div>
+      <div class="rule"><span class="r-ico">💡</span><div><b>灵感来源</b><p>游戏灵感来自 <a href="https://www.rngdle.com/" target="_blank" rel="noopener">RNGdle</a>，徽章设计为本站原创实现。</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sechead" style="margin-top:0"><h2>📜 历史记录</h2><span class="note">仅保存正式抽取</span></div>
+    <div id="history"><div class="empty">还没有历史记录，去抽第一签吧！</div></div>
+  </div>
+
+  <div class="card">
+    <div class="sechead" style="margin-top:0"><h2>🏅 徽章图鉴</h2><span class="note" id="colNote">0 / 0 已解锁</span></div>
+    <div class="col-grid" id="collection"></div>
+  </div>
+
+</main>
+
+<div class="modal" id="rulesModal">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose">✕</button>
+    <h2>🎲 LuckyPick 玩法</h2>
+    <div class="rules">
+      <div class="rule"><span class="r-ico">🎲</span><div><b>每天一次</b><p>每 UTC 日可抽取一个随机数（0 到 1,000,000）。抽过的数字当天锁定，第二天 UTC 零点刷新。</p></div></div>
+      <div class="rule"><span class="r-ico">🏅</span><div><b>徽章与 EP</b><p>数字匹配的每种模式都会解锁徽章并获得 EP。同一家族只计入最高的一枚，其余作为「支持」发现展示。</p></div></div>
+      <div class="rule"><span class="r-ico">⭐</span><div><b>稀有度评级</b><p>垃圾（Bottom 1%）→ 平凡（Bottom 50%）→ 少见（Top 50–25%）→ 稀有（Top 25–10%）→ 史诗（Top 10–5%）→ 异常（Top 5–1%）→ 神话（Top 1%）。</p></div></div>
+      <div class="rule"><span class="r-ico">🎮</span><div><b>演示模式</b><p>「演示抽取」可无限次试玩，不占用每日次数、不保存记录。</p></div></div>
+      <div class="rule"><span class="r-ico">💡</span><div><b>灵感来源</b><p>灵感来自 <a href="https://www.rngdle.com/" target="_blank" rel="noopener">RNGdle</a>。</p></div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>🎲 LuckyPick · 数据仅保存在本地浏览器 · 灵感来自 <a href="https://www.rngdle.com/" target="_blank" rel="noopener">RNGdle</a></p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+var MAX=1000000;
+var LS_ROLLS='luckypick.rolls';
+var LS_MODEL='luckypick.model.v2';
+
+var POW2=new Set();
+for(var v=1;v<=MAX;v*=2)POW2.add(v);
+var FIBS=new Set();
+var fa=0,fb=1;FIBS.add(fa);
+while(fb<=MAX){FIBS.add(fb);var t=fa+fb;fa=fb;fb=t;}
+var FACTS=new Set([1,2,6,24,120,720,5040,40320,362880]);
+var PERFECT=new Set([6,28,496,8128]);
+
+function isPrime(n){
+  if(n<2)return false;
+  if(n%2===0)return n===2;
+  for(var i=3;i*i<=n;i+=2)if(n%i===0)return false;
+  return true;
+}
+function maxRun(s){
+  var best=1,cur=1;
+  for(var i=1;i<s.length;i++){
+    if(s[i]===s[i-1])cur++;else cur=1;
+    if(cur>best)best=cur;
+  }
+  return best;
+}
+function hasRun(s,dir){
+  var cur=1;
+  for(var i=1;i<s.length;i++){
+    var d=s.charCodeAt(i)-s.charCodeAt(i-1);
+    if(d===dir){cur++;if(cur>=3)return true;}
+    else cur=1;
+  }
+  return false;
+}
+function isAlt(n){
+  var s=String(n);
+  if(s.length<5)return false;
+  var a=s[0],b=s[1];
+  if(a===b)return false;
+  for(var i=0;i<s.length;i++){
+    if(s[i]!==(i%2===0?a:b))return false;
+  }
+  return true;
+}
+function isTwins(n){
+  var s=String(n);
+  return s.length===6&&s[0]===s[1]&&s[2]===s[3]&&s[4]===s[5]&&(s[0]!==s[2]||s[2]!==s[4]);
+}
+function cntOf(s,c){
+  var k=0;
+  for(var i=0;i<s.length;i++)if(s[i]===c)k++;
+  return k;
+}
+function isPal(n){
+  var s=String(n);
+  for(var i=0;i<s.length/2;i++)if(s[i]!==s[s.length-1-i])return false;
+  return true;
+}
+function sumDigits(n){
+  var s=String(n),sum=0;
+  for(var i=0;i<s.length;i++)sum+=s.charCodeAt(i)-48;
+  return sum;
+}
+function isCube(n){
+  var c=Math.round(Math.cbrt(n));
+  return c*c*c===n;
+}
+
+var BADGES=[
+  {id:'even',name:'偶数',desc:'能被 2 整除',icon:'👯',fam:'parity',p:500001/1000001,test:function(n){return n%2===0;}},
+  {id:'odd',name:'奇数',desc:'不能被 2 整除',icon:'🦄',fam:'parity',p:500000/1000001,test:function(n){return n%2===1;}},
+  {id:'one',name:'一位数',desc:'0 到 9',icon:'1️⃣',fam:'digits',p:10/1000001,test:function(n){return n<10;}},
+  {id:'two',name:'两位数',desc:'10 到 99',icon:'2️⃣',fam:'digits',p:90/1000001,test:function(n){return n>=10&&n<100;}},
+  {id:'three',name:'三位数',desc:'100 到 999',icon:'3️⃣',fam:'digits',p:900/1000001,test:function(n){return n>=100&&n<1000;}},
+  {id:'four',name:'四位数',desc:'1000 到 9999',icon:'4️⃣',fam:'digits',p:9000/1000001,test:function(n){return n>=1000&&n<10000;}},
+  {id:'five',name:'五位数',desc:'10000 到 99999',icon:'5️⃣',fam:'digits',p:90000/1000001,test:function(n){return n>=10000&&n<100000;}},
+  {id:'six',name:'六位数',desc:'100000 到 1000000',icon:'6️⃣',fam:'digits',p:900001/1000001,test:function(n){return n>=100000;}},
+  {id:'pair',name:'对子',desc:'某数字恰好出现两次',icon:'👫',fam:'run',test:function(n){return maxRun(String(n))===2;}},
+  {id:'triple',name:'三条',desc:'某数字出现三次',icon:'🪆',fam:'run',test:function(n){return maxRun(String(n))===3;}},
+  {id:'quad',name:'四条',desc:'某数字出现四次',icon:'🎱',fam:'run',test:function(n){return maxRun(String(n))===4;}},
+  {id:'quint',name:'五条',desc:'某数字出现五次',icon:'💎',fam:'run',test:function(n){return maxRun(String(n))===5;}},
+  {id:'allsame',name:'六同',desc:'六位全部相同',icon:'🏆',fam:'run',p:9/1000001,test:function(n){var s=String(n);return s.length===6&&maxRun(s)===6;}},
+  {id:'asc',name:'顺子',desc:'连续递增至少 3 位',icon:'📈',fam:'seq',test:function(n){return hasRun(String(n),1);}},
+  {id:'desc',name:'逆序',desc:'连续递减至少 3 位',icon:'📉',fam:'seq',test:function(n){return hasRun(String(n),-1);}},
+  {id:'alt',name:'交替数',desc:'两个数字交替出现',icon:'🎢',fam:'seq',test:isAlt},
+  {id:'twins',name:'双双对',desc:'三个相同对子',icon:'🥂',fam:'seq',test:isTwins},
+  {id:'prime',name:'质数',desc:'只能被 1 和自身整除',icon:'🔬',fam:'math',p:78498/1000001,test:isPrime},
+  {id:'square',name:'平方数',desc:'某个整数的平方',icon:'🟨',fam:'math',p:1001/1000001,test:function(n){return Number.isInteger(Math.sqrt(n));}},
+  {id:'cube',name:'立方数',desc:'某个整数的立方',icon:'🧊',fam:'math',p:101/1000001,test:isCube},
+  {id:'pow2',name:'二的幂',desc:'2 的整数次幂',icon:'💻',fam:'math',p:20/1000001,test:function(n){return POW2.has(n);}},
+  {id:'fib',name:'斐波那契',desc:'斐波那契数列成员',icon:'🐚',fam:'math',p:31/1000001,test:function(n){return FIBS.has(n);}},
+  {id:'fact',name:'阶乘数',desc:'某个整数的阶乘',icon:'🎩',fam:'math',p:9/1000001,test:function(n){return FACTS.has(n);}},
+  {id:'perfect',name:'完全数',desc:'真因子之和等于自身',icon:'✨',fam:'math',p:4/1000001,test:function(n){return PERFECT.has(n);}},
+  {id:'has7',name:'带七',desc:'含有数字 7',icon:'🍀',fam:'sev',test:function(n){return cntOf(String(n),'7')>=1;}},
+  {id:'two7',name:'双七',desc:'至少两个 7',icon:'🥈',fam:'sev',test:function(n){return cntOf(String(n),'7')>=2;}},
+  {id:'three7',name:'三七',desc:'至少三个 7',icon:'🥇',fam:'sev',test:function(n){return cntOf(String(n),'7')>=3;}},
+  {id:'four7',name:'四七',desc:'至少四个 7',icon:'💰',fam:'sev',test:function(n){return cntOf(String(n),'7')>=4;}},
+  {id:'five7',name:'五七',desc:'至少五个 7',icon:'👑',fam:'sev',test:function(n){return cntOf(String(n),'7')>=5;}},
+  {id:'six7',name:'七七',desc:'六个 7',icon:'🌈',fam:'sev',p:1/1000001,test:function(n){return String(n)==='777777';}},
+  {id:'has888',name:'带 888',desc:'含有 888',icon:'🧧',fam:'eight',test:function(n){return String(n).indexOf('888')>-1;}},
+  {id:'has8888',name:'带 8888',desc:'含有 8888',icon:'💰',fam:'eight',test:function(n){return String(n).indexOf('8888')>-1;}},
+  {id:'has88888',name:'带 88888',desc:'含有 88888',icon:'🏦',fam:'eight',test:function(n){return String(n).indexOf('88888')>-1;}},
+  {id:'has888888',name:'八八大发',desc:'888888',icon:'🐉',fam:'eight',p:1/1000001,test:function(n){return String(n)==='888888';}},
+  {id:'end0',name:'整十',desc:'以 0 结尾',icon:'🍩',fam:'end',p:100001/1000001,test:function(n){return n%10===0;}},
+  {id:'end00',name:'整百',desc:'以 00 结尾',icon:'🎀',fam:'end',p:10001/1000001,test:function(n){return n%100===0;}},
+  {id:'end000',name:'整千',desc:'以 000 结尾',icon:'🎁',fam:'end',p:1001/1000001,test:function(n){return n%1000===0;}},
+  {id:'end0000',name:'整万',desc:'以 0000 结尾',icon:'👑',fam:'end',p:101/1000001,test:function(n){return n%10000===0;}},
+  {id:'end00000',name:'整十万',desc:'以 00000 结尾',icon:'🌟',fam:'end',p:11/1000001,test:function(n){return n%100000===0;}},
+  {id:'million',name:'一百万',desc:'刚好 1000000',icon:'🚀',fam:'end',p:1/1000001,test:function(n){return n===MAX;}},
+  {id:'pal',name:'回文数',desc:'正反读都一样',icon:'🪞',fam:'pal',p:1999/1000001,test:isPal},
+  {id:'binary',name:'二进制感',desc:'只含 0 和 1',icon:'👾',fam:'bin',p:65/1000001,test:function(n){return /^[01]+$/.test(String(n));}},
+  {id:'has0',name:'带零',desc:'含有数字 0',icon:'⭕',fam:'have0',test:function(n){return String(n).indexOf('0')>-1;}},
+  {id:'has8',name:'带八',desc:'含有数字 8',icon:'🧧',fam:'have8',test:function(n){return String(n).indexOf('8')>-1;}},
+  {id:'has9',name:'带九',desc:'含有数字 9',icon:'🎏',fam:'have9',test:function(n){return String(n).indexOf('9')>-1;}},
+  {id:'ds7',name:'逢七位和',desc:'数位之和为 7 的倍数',icon:'🪐',fam:'ds',test:function(n){return sumDigits(n)%7===0;}},
+  {id:'dsprime',name:'质数位和',desc:'数位之和为质数',icon:'➕',fam:'ds',test:function(n){return isPrime(sumDigits(n));}},
+  {id:'dssq',name:'平方位和',desc:'数位之和为平方数',icon:'🟰',fam:'ds',test:function(n){return Number.isInteger(Math.sqrt(sumDigits(n)));}},
+  {id:'sum7',name:'数位和七',desc:'数位之和刚好为 7',icon:'🍀',fam:'ds',test:function(n){return sumDigits(n)===7;}},
+  {id:'m69',name:'六九',desc:'经典数字 69',icon:'😏',fam:'meme',p:1/1000001,test:function(n){return n===69;}},
+  {id:'m404',name:'未找到',desc:'404',icon:'❓',fam:'meme',p:1/1000001,test:function(n){return n===404;}},
+  {id:'m420',name:'四二零',desc:'420',icon:'🌿',fam:'meme',p:1/1000001,test:function(n){return n===420;}},
+  {id:'m520',name:'我爱你',desc:'520',icon:'💖',fam:'meme',p:1/1000001,test:function(n){return n===520;}},
+  {id:'m666',name:'恶魔数',desc:'666',icon:'😈',fam:'meme',p:1/1000001,test:function(n){return n===666;}},
+  {id:'m1314',name:'一生一世',desc:'1314',icon:'💞',fam:'meme',p:1/1000001,test:function(n){return n===1314;}},
+  {id:'m1337',name:'黑客数',desc:'1337',icon:'💻',fam:'meme',p:1/1000001,test:function(n){return n===1337;}},
+  {id:'m2333',name:'大笑',desc:'2333',icon:'😂',fam:'meme',p:1/1000001,test:function(n){return n===2333;}},
+  {id:'m9001',name:'战破九千',desc:'9001',icon:'💥',fam:'meme',p:1/1000001,test:function(n){return n===9001;}},
+  {id:'m114514',name:'美味',desc:'114514',icon:'🍜',fam:'meme',p:1/1000001,test:function(n){return n===114514;}},
+  {id:'m271828',name:'自然常数',desc:'271828',icon:'💫',fam:'meme',p:1/1000001,test:function(n){return n===271828;}},
+  {id:'m314159',name:'圆周率',desc:'314159',icon:'🥧',fam:'meme',p:1/1000001,test:function(n){return n===314159;}},
+  {id:'m520520',name:'恋爱循环',desc:'520520',icon:'💕',fam:'meme',p:1/1000001,test:function(n){return n===520520;}},
+  {id:'m654321',name:'倒数之王',desc:'654321',icon:'⬇️',fam:'meme',p:1/1000001,test:function(n){return n===654321;}},
+  {id:'m999999',name:'至尊',desc:'999999',icon:'🎰',fam:'meme',p:1/1000001,test:function(n){return n===999999;}}
+];
+
+var TIERS=[
+  {key:'trash',name:'垃圾',en:'Trash',icon:'💩',max:0.01},
+  {key:'common',name:'平凡',en:'Common',icon:'⬜',max:0.50},
+  {key:'uncommon',name:'少见',en:'Uncommon',icon:'🟩',max:0.75},
+  {key:'rare',name:'稀有',en:'Rare',icon:'🟦',max:0.90},
+  {key:'epic',name:'史诗',en:'Epic',icon:'🟪',max:0.95},
+  {key:'anomaly',name:'异常',en:'Anomaly',icon:'🟨',max:0.99},
+  {key:'mythic',name:'神话',en:'Mythic',icon:'🏆',max:1.01}
+];
+var BT_TIERS=[
+  {key:'common',name:'常见',en:'Common',min:0.1},
+  {key:'uncommon',name:'少见',en:'Uncommon',min:0.01},
+  {key:'rare',name:'稀有',en:'Rare',min:0.001},
+  {key:'epic',name:'史诗',en:'Epic',min:0.0001},
+  {key:'anomaly',name:'异常',en:'Anomaly',min:0.00001},
+  {key:'mythic',name:'神话',en:'Mythic',min:0}
+];
+
+function tierOf(p){
+  var pb=p.below;
+  for(var i=0;i<TIERS.length;i++)if(pb<TIERS[i].max)return TIERS[i];
+  return TIERS[TIERS.length-1];
+}
+function btierOf(p){
+  for(var i=0;i<BT_TIERS.length;i++)if(p>BT_TIERS[i].min)return BT_TIERS[i];
+  return BT_TIERS[BT_TIERS.length-1];
+}
+
+var MODEL=null;
+function applyModel(m){
+  for(var i=0;i<BADGES.length;i++){
+    var b=BADGES[i];
+    var p=b.p!==undefined?b.p:(((m.counts[b.id]||0)+1)/(m.N+1));
+    b._p=p;
+    b._ep=Math.max(30,Math.round(1000*Math.log10(1/p)));
+  }
+}
+function buildModel(){
+  var N=20000;
+  var samples=new Uint32Array(N);
+  var counts={};
+  for(var i=0;i<N;i++){
+    var n=rand();
+    samples[i]=n;
+    for(var j=0;j<BADGES.length;j++){
+      if(BADGES[j].test(n))counts[BADGES[j].id]=(counts[BADGES[j].id]||0)+1;
+    }
+  }
+  var m={N:N,counts:counts,dist:{}};
+  applyModel(m);
+  for(var k=0;k<N;k++){
+    var ep=scoreRaw(samples[k])._ep;
+    m.dist[ep]=(m.dist[ep]||0)+1;
+  }
+  return m;
+}
+function loadModel(){
+  try{
+    var raw=localStorage.getItem(LS_MODEL);
+    if(!raw)return null;
+    var m=JSON.parse(raw);
+    if(!m||!m.N||!m.dist)return null;
+    applyModel(m);
+    return m;
+  }catch(e){return null;}
+}
+function saveModel(m){
+  try{localStorage.setItem(LS_MODEL,JSON.stringify({N:m.N,counts:m.counts,dist:m.dist}));}catch(e){}
+}
+function ensureModel(){
+  if(!MODEL){
+    MODEL=loadModel();
+    if(!MODEL){MODEL=buildModel();saveModel(MODEL);}
+  }
+  return MODEL;
+}
+function scoreRaw(n){
+  var best={};
+  for(var i=0;i<BADGES.length;i++){
+    var b=BADGES[i];
+    if(b.test(n)){
+      var cur=best[b.fam];
+      if(!cur||b._ep>cur._ep)best[b.fam]=b;
+    }
+  }
+  var ep=0;
+  for(var f in best)ep+=best[f]._ep;
+  return {_ep:ep};
+}
+function scoreRoll(n){
+  ensureModel();
+  var matches=[];
+  for(var i=0;i<BADGES.length;i++){
+    var b=BADGES[i];
+    if(b.test(n))matches.push({b:b,t:btierOf(b._p)});
+  }
+  var best={};
+  for(var j=0;j<matches.length;j++){
+    var m=matches[j];
+    var cur=best[m.b.fam];
+    if(!cur||m.b._ep>cur.b._ep)best[m.b.fam]=m;
+  }
+  var main=[],support=[];
+  for(var k=0;k<matches.length;k++){
+    if(best[matches[k].b.fam]===matches[k])main.push(matches[k]);
+    else support.push(matches[k]);
+  }
+  var ep=0;
+  for(var l=0;l<main.length;l++)ep+=main[l].b._ep;
+  return {ep:ep,main:main,support:support};
+}
+function pctlOf(ep){
+  var m=ensureModel();
+  var below=0,ties=0;
+  for(var k in m.dist){
+    var v=Number(k);
+    if(v<ep)below+=m.dist[k];
+    else if(v===ep)ties=m.dist[k];
+  }
+  return {below:below/m.N,ties:ties/m.N,display:(below+ties)/m.N};
+}
+
+function rand(){
+  var b=new Uint32Array(1);
+  crypto.getRandomValues(b);
+  return b[0]%(MAX+1);
+}
+function utcDate(){
+  var n=new Date();
+  return n.getUTCFullYear()+'-'+String(n.getUTCMonth()+1).padStart(2,'0')+'-'+String(n.getUTCDate()).padStart(2,'0');
+}
+function loadRolls(){
+  try{return JSON.parse(localStorage.getItem(LS_ROLLS)||'{}');}catch(e){return {};}
+}
+function saveRolls(){
+  try{localStorage.setItem(LS_ROLLS,JSON.stringify(rolls));}catch(e){}
+}
+function $(id){return document.getElementById(id);}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function toast(msg){
+  var t=$('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm=setTimeout(function(){t.classList.remove('show');},1800);
+}
+
+var today=utcDate();
+var rolls=loadRolls();
+var rolling=false;
+
+function topText(p){
+  var d=p.display*100;
+  if(p.below<0.5)return 'Bottom '+d.toFixed(d<1?2:1)+'%';
+  var top=(1-p.display)*100;
+  return 'Top '+top.toFixed(top<1?2:1)+'%';
+}
+
+function renderResult(num,score,pctl,tier,demo,instant){
+  var box=$('result');
+  box.className='show';
+  var html='';
+  html+='<div class="banner t-'+tier.key+'">';
+  html+='<div class="banner-icon">'+tier.icon+'</div>';
+  html+='<div class="banner-name">'+tier.name+' · '+tier.en+'</div>';
+  html+='<div class="banner-top">'+topText(pctl)+' · 共 '+num.toLocaleString('en-US')+'</div>';
+  html+='<div class="banner-ep">+'+score.ep.toLocaleString('en-US')+' EP</div>';
+  html+='</div>';
+  html+='<div class="sechead"><h2>徽章解锁</h2><span class="note">同家族仅最高计入</span></div>';
+  html+='<div class="badge-grid">';
+  for(var i=0;i<score.main.length;i++){
+    var m=score.main[i];
+    html+='<div class="badge-card bt-'+m.t.key+(instant?'':' style="animation-delay:'+(i*70)+'ms"')+'">';
+    html+='<div class="b-icon">'+m.b.icon+'</div>';
+    html+='<div class="b-name">'+m.b.name+'</div>';
+    html+='<div class="b-tier">'+m.t.name+' · '+m.t.en+'</div>';
+    html+='<div class="b-ep">+'+m.b._ep.toLocaleString('en-US')+' EP</div>';
+    html+='</div>';
+  }
+  for(var j=0;j<score.support.length;j++){
+    var sm=score.support[j];
+    html+='<div class="badge-card support bt-'+sm.t.key+(instant?'':' style="animation-delay:'+((score.main.length+j)*70)+'ms"')+'">';
+    html+='<div class="b-icon">'+sm.b.icon+'</div>';
+    html+='<div class="b-name">'+sm.b.name+'</div>';
+    html+='<div class="b-tier">'+sm.t.name+'</div>';
+    html+='<div class="b-ep">+0 EP</div>';
+    html+='</div>';
+  }
+  if(score.main.length===0&&score.support.length===0){
+    html+='<div class="empty" style="grid-column:1/-1">这串数字没有任何特殊模式…够惨，也是种缘分</div>';
+  }
+  html+='</div>';
+  html+='<div class="actions">';
+  html+='<button class="btn btn-ghost" id="shareBtn">📤 分享结果</button>';
+  html+='<button class="btn btn-ghost" id="copyBtn">📋 复制文本</button>';
+  html+='</div>';
+  if(demo)html+='<div class="demo-note">🎮 演示模式 · 结果未保存</div>';
+  box.innerHTML=html;
+  var res={num:num,score:score,pctl:pctl,tier:tier,demo:demo};
+  $('shareBtn').onclick=function(){shareResult(res);};
+  $('copyBtn').onclick=function(){copyResult(res);};
+}
+
+function reveal(numStr){
+  var cells=Array.prototype.slice.call(document.querySelectorAll('#digits .digit'));
+  var s=numStr;
+  var pad=6-s.length;
+  for(var i=0;i<6;i++){
+    var c=cells[i];
+    if(i<pad){c.textContent='·';c.classList.add('dim');}
+    else{c.textContent='';c.classList.remove('dim');}
+  }
+  var dur=1500;
+  return new Promise(function(res){
+    var t0=performance.now();
+    function frame(now){
+      var t=(now-t0)/dur;
+      for(var i=0;i<6;i++){
+        if(i<pad)continue;
+        var j=i-pad;
+        var settle=0.22+j*0.1;
+        if(t>=settle)cells[i].textContent=s[j];
+        else cells[i].textContent=String(Math.floor(Math.random()*10));
+      }
+      if(t<1)requestAnimationFrame(frame);
+      else res();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function finishRoll(n,demo){
+  var score=scoreRoll(n);
+  var pctl=pctlOf(score.ep);
+  var tier=tierOf(pctl);
+  renderResult(n,score,pctl,tier,demo,false);
+  if(!demo){
+    rolls[today]={num:n,ts:Date.now()};
+    saveRolls();
+    $('status').textContent='已抽取 · 今日好运已锁定';
+    $('rollBtn').disabled=true;
+    $('rollBtn').textContent='✅ 今日已抽';
+    renderStats();
+    renderHistory();
+    renderCollection();
+  }
+}
+
+async function doRoll(demo){
+  if(rolling)return;
+  if(!demo&&rolls[today])return;
+  rolling=true;
+  var btn=$('rollBtn');
+  btn.disabled=true;
+  btn.textContent='🎲 开抽中…';
+  $('status').textContent='命运正在洗牌…';
+  await sleep(120);
+  var n=rand();
+  await reveal(String(n));
+  await sleep(160);
+  finishRoll(n,demo);
+  btn.disabled=!demo&&Boolean(rolls[today]);
+  if(!demo){
+    btn.textContent='✅ 今日已抽';
+  }else{
+    btn.disabled=false;
+    btn.textContent='🎲 今日开抽';
+    $('status').textContent='演示模式 · 结果未保存，可无限试玩';
+  }
+  rolling=false;
+}
+
+function shareResult(res){
+  var text=shareText(res);
+  if(navigator.share){
+    navigator.share({title:'LuckyPick 每日抽号',text:text}).catch(function(){});
+  }else{
+    copyResult(res);
+  }
+}
+function copyResult(res){
+  var text=shareText(res);
+  function done(){toast('已复制分享文本');}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done,function(){fallbackCopy(text);done();});
+  }else{
+    fallbackCopy(text);
+    done();
+  }
+}
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+}
+function shareText(res){
+  var lines=[
+    '🎲 LuckyPick 每日抽号',
+    '📅 '+today,
+    '🔢 '+res.num.toLocaleString('en-US'),
+    res.tier.icon+' '+res.tier.name+'（'+res.tier.en+'）· '+topText(res.pctl),
+    '⚡ EP +'+res.score.ep.toLocaleString('en-US'),
+    '🏅 '+res.score.main.map(function(m){return m.b.name;}).join(' · ')
+  ];
+  if(res.demo)lines.push('🎮 演示模式（未保存）');
+  lines.push('','https://qefkjb.github.io/LuckyPick/');
+  return lines.join('\n');
+}
+
+function renderStats(){
+  var life=0,col={};
+  var keys=Object.keys(rolls);
+  for(var i=0;i<keys.length;i++){
+    var s=scoreRoll(rolls[keys[i]].num);
+    life+=s.ep;
+    for(var j=0;j<s.main.length;j++)col[s.main[j].b.id]=1;
+    for(var k=0;k<s.support.length;k++)col[s.support[k].b.id]=1;
+  }
+  var todayRoll=rolls[today];
+  $('stToday').textContent=todayRoll?'+'+scoreRoll(todayRoll.num).ep.toLocaleString('en-US'):'—';
+  $('stLife').textContent=life.toLocaleString('en-US');
+  $('stCol').textContent=Object.keys(col).length+'/'+BADGES.length;
+}
+
+function renderHistory(){
+  var box=$('history');
+  var keys=Object.keys(rolls).sort().reverse();
+  if(keys.length===0){
+    box.innerHTML='<div class="empty">还没有历史记录，去抽第一签吧！</div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<keys.length&&i<60;i++){
+    var d=keys[i];
+    var r=rolls[d];
+    var s=scoreRoll(r.num);
+    var pctl=pctlOf(s.ep);
+    var tier=tierOf(pctl);
+    html+='<div class="h-row">';
+    html+='<span class="h-date">'+d+'</span>';
+    html+='<span class="h-num">'+r.num.toLocaleString('en-US')+'</span>';
+    html+='<span class="chip t-'+tier.key+'">'+tier.icon+' '+tier.name+'</span>';
+    html+='<span class="h-ep">+'+s.ep.toLocaleString('en-US')+'</span>';
+    html+='</div>';
+  }
+  box.innerHTML=html;
+}
+
+function renderCollection(){
+  var box=$('collection');
+  var col={};
+  var keys=Object.keys(rolls);
+  for(var i=0;i<keys.length;i++){
+    var s=scoreRoll(rolls[keys[i]].num);
+    var all=s.main.concat(s.support);
+    for(var j=0;j<all.length;j++){
+      col[all[j].b.id]=(col[all[j].b.id]||0)+1;
+    }
+  }
+  $('colNote').textContent=Object.keys(col).length+' / '+BADGES.length+' 已解锁';
+  var html='';
+  for(var k=0;k<BADGES.length;k++){
+    var b=BADGES[k];
+    var c=col[b.id]||0;
+    html+='<div class="col-item'+(c?'':' locked')+'">';
+    if(c)html+='<span class="c-count">×'+c+'</span>';
+    html+='<div class="c-icon">'+(c?b.icon:'❔')+'</div>';
+    html+='<div class="c-name">'+(c?b.name:'???')+'</div>';
+    html+='</div>';
+  }
+  box.innerHTML=html;
+}
+
+function renderDay(){
+  if(rolls[today]){
+    var r=rolls[today];
+    $('status').textContent='已抽取 · 今日好运已锁定';
+    $('rollBtn').disabled=true;
+    $('rollBtn').textContent='✅ 今日已抽';
+    var score=scoreRoll(r.num);
+    var pctl=pctlOf(score.ep);
+    renderResult(r.num,score,pctl,tierOf(pctl),false,true);
+  }else{
+    $('status').textContent='今日尚未抽取';
+    $('rollBtn').disabled=false;
+    $('rollBtn').textContent='🎲 今日开抽';
+    $('result').innerHTML='';
+    $('result').className='';
+    var cells=Array.prototype.slice.call(document.querySelectorAll('#digits .digit'));
+    for(var i=0;i<cells.length;i++){
+      cells[i].textContent='·';
+      cells[i].classList.add('dim');
+    }
+  }
+  renderStats();
+  renderHistory();
+  renderCollection();
+}
+
+function tickCountdown(){
+  var now=new Date();
+  var next=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1);
+  var ms=next-now.getTime();
+  if(ms<=0){
+    today=utcDate();
+    renderDay();
+    return;
+  }
+  var h=Math.floor(ms/3600000);
+  var m=Math.floor(ms%3600000/60000);
+  var s=Math.floor(ms%60000/1000);
+  $('cdTime').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  $('cdDate').textContent='UTC '+today+' 刷新';
+}
+
+function initTheme(){
+  var saved=localStorage.getItem('theme');
+  var dark=saved? saved==='dark' : (!window.matchMedia||window.matchMedia('(prefers-color-scheme: dark)').matches);
+  var btn=$('themeBtn');
+  function sync(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    btn.textContent=cur==='dark'?'☀️':'🌙';
+  }
+  btn.onclick=function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var nxt=cur==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',nxt);
+    try{localStorage.setItem('theme',nxt);}catch(e){}
+    sync();
+  };
+  sync();
+}
+
+function init(){
+  initTheme();
+  $('rollBtn').onclick=function(){doRoll(false);};
+  $('demoBtn').onclick=function(){doRoll(true);};
+  $('rulesBtn').onclick=function(){$('rulesModal').classList.add('show');};
+  $('modalClose').onclick=function(){$('rulesModal').classList.remove('show');};
+  $('rulesModal').onclick=function(e){if(e.target===$('rulesModal'))$('rulesModal').classList.remove('show');};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')$('rulesModal').classList.remove('show');});
+  renderDay();
+  tickCountdown();
+  setInterval(tickCountdown,500);
+  setTimeout(function(){try{ensureModel();}catch(e){}},300);
+}
+
+init();
+})();
+</script>
+</body>
+</html>
